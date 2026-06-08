@@ -335,11 +335,32 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 .btn-login:hover{color:var(--gold);border-color:var(--gold-dim)}
 @media(max-width:640px){ .btn-vip{padding:6px 10px;font-size:12px} }
 
-/* ===== 全屏覆盖层：会员 / 登录 ===== */
-#memberScreen,#loginScreen{position:fixed;inset:0;z-index:158;display:none;flex-direction:column;padding:54px 5vw 60px;overflow-y:auto;
+/* ===== 全屏覆盖层：会员 / 登录 / 本命牌 ===== */
+#memberScreen,#loginScreen,#birthScreen{position:fixed;inset:0;z-index:158;display:none;flex-direction:column;padding:54px 5vw 60px;overflow-y:auto;
   background:rgba(5,4,11,.95) url('assets/web/corridor.webp') center/cover fixed}
-#memberScreen::before,#loginScreen::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(125% 95% at 50% -5%, rgba(16,23,44,.78), rgba(6,5,14,.96) 68%)}
-#memberScreen.open,#loginScreen.open{display:flex;animation:fade .45s}
+#memberScreen::before,#loginScreen::before,#birthScreen::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(125% 95% at 50% -5%, rgba(16,23,44,.78), rgba(6,5,14,.96) 68%)}
+#memberScreen.open,#loginScreen.open,#birthScreen.open{display:flex;animation:fade .45s}
+
+/* 本命牌入口 CTA */
+.birth-cta{max-width:560px;margin:28px auto 0;display:flex;align-items:center;gap:16px;justify-content:space-between;
+  padding:16px 20px;border:1px solid var(--gold-dim);border-radius:18px;background:linear-gradient(120deg,rgba(231,201,138,.1),rgba(8,10,20,.3));cursor:pointer;transition:.2s}
+.birth-cta:hover{border-color:var(--gold);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.birth-cta-txt{text-align:left}
+.birth-cta-txt b{display:block;color:var(--gold);font-size:16px;margin-bottom:3px}
+.birth-cta-txt span{color:var(--text-dim);font-size:12.5px;line-height:1.4}
+.birth-cta-btn{flex-shrink:0;padding:10px 18px;border-radius:22px;border:none;background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408;font-size:14px;cursor:pointer;font-family:inherit;letter-spacing:1px}
+/* 本命牌页 */
+.bs-wrap{max-width:520px;margin:0 auto;width:100%;text-align:center}
+.bs-sub{color:var(--text-dim);font-size:13.5px;line-height:1.7;margin:12px 0 26px}
+.bs-date{display:flex;gap:12px;justify-content:center;margin-bottom:22px}
+.bs-date input{width:33%;max-width:140px;padding:13px;text-align:center;background:rgba(8,10,20,.6);border:1px solid var(--line);border-radius:12px;color:var(--text);font-size:15px;font-family:inherit}
+.bs-date input:focus{outline:none;border-color:var(--gold-dim)}
+#bsResult{margin-top:28px}
+.bs-card{display:flex;flex-direction:column;align-items:center;animation:fade .6s}
+.bs-card img{width:200px;border-radius:14px;border:1px solid var(--gold-dim);box-shadow:0 16px 44px rgba(0,0,0,.6)}
+.bs-name{margin-top:18px;font-size:24px;color:var(--gold);font-family:"Noto Serif SC",serif}
+.bs-kw{margin-top:8px;color:var(--gold-soft);font-size:13px;letter-spacing:1px}
+.bs-desc{margin:18px auto 0;max-width:440px;color:#e7e6f2;font-size:14.5px;line-height:1.85;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
 .ov-close{position:fixed;top:22px;right:26px;z-index:6;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--text-dim);font-size:18px;cursor:pointer}
 .ov-close:hover{color:var(--gold);border-color:var(--gold-dim)}
 
@@ -487,6 +508,17 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 .chat-box input:focus{outline:none;border-color:var(--gold-dim)}
 .chat-box button{width:44px;height:44px;flex-shrink:0;border-radius:50%;border:none;background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408;font-size:18px;cursor:pointer}
 .chat-box button:hover{box-shadow:0 6px 20px rgba(232,200,122,.4)}
+
+/* ===== 命运分享海报 ===== */
+#posterModal{z-index:250}
+.result-acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+.poster-box{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:16px;width:min(400px,92vw);max-height:92vh;overflow:auto;text-align:center;box-shadow:var(--shadow)}
+.poster-box img{width:100%;border-radius:12px;display:block}
+.poster-tip{color:var(--text-dim);font-size:12.5px;margin:12px 0 14px;line-height:1.5}
+.poster-acts{display:flex;gap:10px;justify-content:center}
+.poster-dl,.poster-x{padding:10px 24px;border-radius:22px;font-size:14px;cursor:pointer;font-family:inherit;text-decoration:none}
+.poster-dl{background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408;border:none}
+.poster-x{background:transparent;border:1px solid var(--line);color:var(--text-dim)}
 </style>
 </head>
 <body>
@@ -549,6 +581,11 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
   <div class="modes-title serif">✦ 本周热门玩法</div>
   <div class="chips" id="chips"></div>
 
+  <div class="birth-cta" id="birthCta">
+    <div class="birth-cta-txt"><b class="serif">✦ 你的本命牌</b><span>输入生日，揭晓命中注定的那张大阿卡纳，与你的塔罗人格</span></div>
+    <button class="birth-cta-btn cinzel">测一测 →</button>
+  </div>
+
   <div id="result">
     <div class="spread-name serif" id="spreadName"></div>
     <div class="q-echo" id="qEcho"></div>
@@ -556,7 +593,10 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
     <div class="cards" id="cards"></div>
     <div id="readingBox"></div>
     <div id="chatWrap"></div>
-    <button class="again" id="again">↺ 再占一次</button>
+    <div class="result-acts">
+      <button class="again" id="shareReading" style="display:none">✦ 生成分享卡</button>
+      <button class="again" id="again">↺ 再占一次</button>
+    </div>
   </div>
 </main>
 
@@ -686,6 +726,35 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 <div id="screenLoad">
   <div class="sl-sigil"><i></i><i></i><span class="sl-star">✦</span></div>
   <div class="sl-label cinzel" id="slLabel"></div>
+</div>
+
+<!-- ===== 本命牌 / 塔罗人格 ===== -->
+<div id="birthScreen">
+  <button class="ov-close" id="bsClose">✕</button>
+  <div class="bs-wrap">
+    <div class="mb-kicker cinzel">YOUR BIRTH CARD</div>
+    <h2 class="mb-title serif">你的本命牌</h2>
+    <p class="bs-sub">输入你的生日，揭晓命中注定的那张大阿卡纳——它藏着你的人格底色与今生功课。</p>
+    <div class="bs-date">
+      <input id="bsY" type="number" inputmode="numeric" placeholder="年 如1995" min="1920" max="2025">
+      <input id="bsM" type="number" inputmode="numeric" placeholder="月" min="1" max="12">
+      <input id="bsD" type="number" inputmode="numeric" placeholder="日" min="1" max="31">
+    </div>
+    <button class="ms-draw cinzel" id="bsGo">揭 晓 本 命 牌</button>
+    <div id="bsResult"></div>
+  </div>
+</div>
+
+<!-- ===== 命运分享海报 ===== -->
+<div class="modal-bg" id="posterModal">
+  <div class="poster-box">
+    <img id="posterImg" alt="命运分享卡">
+    <p class="poster-tip">长按图片保存到相册 → 分享给好友 / 发朋友圈</p>
+    <div class="poster-acts">
+      <a id="posterDl" download="星语塔罗.jpg" class="poster-dl">下载图片</a>
+      <button id="posterClose" class="poster-x">关闭</button>
+    </div>
+  </div>
 </div>
 
 <div class="fab"><button id="fabFb">✦ 反馈</button></div>
@@ -958,8 +1027,18 @@ async function revealAndRead(q,spread,draws){
   const _panel=box.querySelector('.reading'); if(_panel && !_panel.querySelector('.reading-sign')){ _panel.insertAdjacentHTML('beforeend',`<p class="reading-sign serif">—— ${currentReader.name}</p>`); }
   if(!box.querySelector('.reading-disclaimer')){ box.insertAdjacentHTML('beforeend','<p class="reading-disclaimer">✦ 塔罗解读仅供娱乐与自我探索 · 不构成医疗、法律、财务或心理等专业建议，请把决定权留给你自己。<br>牌序由系统即时随机生成，与你是否付费无关。</p>'); }
   if(usedAI && readingText){ try{ mountChat(q,spread,draws,readingText); }catch(e){} }
+  try{
+    const sBtn=document.getElementById('shareReading');
+    if(sBtn){ sBtn.style.display='inline-block';
+      sBtn.onclick=async ()=>{ const d0=draws[0];
+        const line=(readingText||localReadingPlain(q,spread,draws)).replace(/【[^】]*】/g,'').split(/[。！？\n]/).map(s=>s.trim()).filter(Boolean)[0]||q;
+        const url=await makePoster({headline:`${currentReader.name} · ${spread.name}`,cardIdx:d0.card.idx,big:`「${(q||'').slice(0,12)}」`,lines:[line.slice(0,44)],footer:'叩问命运 · 照见自己'});
+        showPoster(url); };
+    }
+  }catch(e){}
   busy=false;document.getElementById("send").disabled=false;
 }
+function localReadingPlain(q,spread,draws){ return draws.map((d,i)=>`${spread.pos[i]||''}${d.card.n}`).join('，'); }
 
 /* ---------- 6c. 对话式追问（翻牌后和塔罗师继续聊） ---------- */
 let chatCtx=null;
@@ -1280,7 +1359,7 @@ document.getElementById('heroVid')?.addEventListener('loadeddata',function(){ th
 function updateHero(){
   const hv=document.getElementById('heroVid'); if(!hv)return;
   const intro=document.getElementById('intro'); const introGone=!intro||intro.classList.contains('gone');
-  const overlay=['drawFan','modeScreen','readerScreen','memberScreen','loginScreen','howBg'].some(id=>{const e=document.getElementById(id);return e&&(e.classList.contains('open')||e.classList.contains('show'));});
+  const overlay=['drawFan','modeScreen','readerScreen','memberScreen','loginScreen','birthScreen','howBg'].some(id=>{const e=document.getElementById(id);return e&&(e.classList.contains('open')||e.classList.contains('show'));});
   const shouldPlay=introGone && !overlay && !document.hidden;
   if(shouldPlay){ if(hv.paused) hv.play().catch(()=>{}); }
   else if(!hv.paused){ try{hv.pause();}catch(e){} }
@@ -1382,6 +1461,64 @@ document.getElementById('lgClose')?.addEventListener('click',()=>document.getEle
 document.getElementById('lgSend')?.addEventListener('click',()=>{const v=(document.getElementById('lgEmail').value||'').trim();toast(v?'演示界面 · 正式版将向你的邮箱发送登录链接':'请先填写邮箱');});
 document.querySelectorAll('.soc-btn').forEach(b=>b.addEventListener('click',()=>toast('演示界面 · '+b.dataset.soc+' 登录将在正式版开放')));
 
+/* ---------- 18c. 本命牌 / 塔罗人格 ---------- */
+function birthCardIndex(y,m,d){
+  let str=String(y)+String(m).padStart(2,'0')+String(d).padStart(2,'0');
+  let n=str.split('').reduce((a,c)=>a+(+c),0);
+  while(n>21){ n=String(n).split('').reduce((a,c)=>a+(+c),0); }
+  return n; // 0–21 → MAJ 索引
+}
+function openBirth(){ document.getElementById('bsResult').innerHTML=''; document.getElementById('birthScreen').classList.add('open'); }
+document.getElementById('birthCta')?.addEventListener('click',openBirth);
+document.getElementById('bsClose')?.addEventListener('click',()=>document.getElementById('birthScreen').classList.remove('open'));
+let bsBusy=false;
+document.getElementById('bsGo')?.addEventListener('click',async ()=>{
+  if(bsBusy)return;
+  const y=+document.getElementById('bsY').value, m=+document.getElementById('bsM').value, d=+document.getElementById('bsD').value;
+  if(!y||!m||!d||y<1920||y>2025||m<1||m>12||d<1||d>31){ toast('请输入完整、正确的生日'); return; }
+  bsBusy=true;
+  const n=birthCardIndex(y,m,d), c=MAJ[n];   // [名,en,emoji,正,逆,极性]
+  const box=document.getElementById('bsResult');
+  box.innerHTML=`<div class="bs-card"><img src="cards/${n}.webp" alt="${c[0]}" onerror="this.style.display='none'"><div class="bs-name">本命牌 · ${c[0]}</div><div class="bs-kw">${c[3]}</div><div class="bs-desc" id="bsDesc"><span class="dots"></span> 正在为你解读塔罗人格…</div></div>`;
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+  const sys=[{role:'system',content:`你是温暖而有洞察力的塔罗人格分析师。来访者的本命牌是「${c[0]}（${c[1]}）」，核心关键词：${c[3]}。请用第二人称「你」写一段约 160 字的《你的塔罗人格》：描述这类人的性格底色、独有天赋、以及今生要修的功课。语气肯定、治愈、有画面感；不要用 markdown、井号、星号，自然成段。`}];
+  try{
+    if(aiReady || (aiCfg.use&&aiCfg.key)){
+      await streamMessages(sys,(full)=>{ document.getElementById('bsDesc').textContent=full; },0.9);
+    }else{
+      document.getElementById('bsDesc').textContent=`你天生带着「${c[0]}」的气质：${c[3]}。这是你的人格底色，也是你今生反复要面对的课题。`;
+    }
+  }catch(e){ document.getElementById('bsDesc').textContent=`你天生带着「${c[0]}」的气质：${c[3]}。`; }
+  bsBusy=false;
+  const r=document.getElementById('bsResult'); if(r && !document.getElementById('bsShare')){ r.insertAdjacentHTML('beforeend',`<button id="bsShare" class="ms-skip" style="display:block;margin:20px auto 0;color:var(--gold)">✦ 生成我的本命卡 · 分享给好友</button>`); document.getElementById('bsShare').addEventListener('click',async ()=>{ const desc=(document.getElementById('bsDesc')||{}).textContent||''; const url=await makePoster({headline:'我的本命牌',cardIdx:n,big:c[0],lines:[desc.slice(0,46)],footer:'你的塔罗人格 · 星语塔罗'}); showPoster(url); }); }
+});
+
+/* ---------- 18d. 命运分享海报（Canvas 出图，可存图分享） ---------- */
+function _loadImg(src){return new Promise((res,rej)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>res(im);im.onerror=rej;im.src=src;});}
+function _rr(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath();}
+function _wrap(x,text,cx,y,maxW,lh){const chars=[...String(text)];let line='',yy=y;for(const ch of chars){if(x.measureText(line+ch).width>maxW&&line){x.fillText(line,cx,yy);line=ch;yy+=lh;}else line+=ch;}if(line)x.fillText(line,cx,yy);return yy+lh;}
+async function makePoster({headline,cardIdx,big,lines,footer}){
+  const W=1080,H=1920,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0c1330');g.addColorStop(.55,'#0a1022');g.addColorStop(1,'#05060f');x.fillStyle=g;x.fillRect(0,0,W,H);
+  const rg=x.createRadialGradient(W/2,780,60,W/2,780,820);rg.addColorStop(0,'rgba(231,201,138,.14)');rg.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=rg;x.fillRect(0,0,W,H);
+  for(let i=0;i<70;i++){x.globalAlpha=Math.random()*.6+.15;x.fillStyle='#e7c98a';x.beginPath();x.arc(Math.random()*W,Math.random()*H,Math.random()*2+.5,0,7);x.fill();}x.globalAlpha=1;
+  x.textAlign='center';
+  x.fillStyle='#e7c98a';x.font='600 46px "Noto Serif SC",serif';x.fillText('星 语 塔 罗',W/2,148);
+  if(headline){x.fillStyle='rgba(205,174,114,.85)';x.font='28px "Noto Sans SC",sans-serif';x.fillText(headline,W/2,206);}
+  let cardBottom=300;
+  if(cardIdx!=null){try{const img=await _loadImg('cards/'+cardIdx+'.png');const cw=430,ch=cw*1.58,cx=(W-cw)/2,cy=258;_rr(x,cx,cy,cw,ch,22);x.save();x.clip();x.drawImage(img,cx,cy,cw,ch);x.restore();x.strokeStyle='rgba(231,201,138,.75)';x.lineWidth=3;_rr(x,cx,cy,cw,ch,22);x.stroke();cardBottom=cy+ch;}catch(e){}}
+  let y=cardBottom+92;
+  if(big){x.fillStyle='#f3d98c';x.font='700 62px "Noto Serif SC",serif';x.fillText(big,W/2,y);y+=80;}
+  x.fillStyle='#e7e6f2';x.font='34px "Noto Sans SC",sans-serif';
+  (lines||[]).forEach(ln=>{ if(ln) y=_wrap(x,ln,W/2,y,W-220,54)+8; });
+  x.fillStyle='rgba(205,174,114,.92)';x.font='30px "Noto Serif SC",serif';x.fillText(footer||'叩问命运 · 照见自己',W/2,H-152);
+  x.fillStyle='rgba(154,161,189,.72)';x.font='24px "Noto Sans SC",sans-serif';x.fillText('星语塔罗 · 来测属于你的那张牌',W/2,H-102);
+  return cv.toDataURL('image/jpeg',.92);
+}
+function showPoster(url){ document.getElementById('posterImg').src=url; const dl=document.getElementById('posterDl'); if(dl){dl.href=url;} document.getElementById('posterModal').classList.add('open'); }
+document.getElementById('posterClose')?.addEventListener('click',()=>document.getElementById('posterModal').classList.remove('open'));
+document.getElementById('posterModal')?.addEventListener('click',e=>{ if(e.target.id==='posterModal') document.getElementById('posterModal').classList.remove('open'); });
+
 /* ---------- 19. 玩法说明：首次抽牌前的仪式说明 ---------- */
 let pendingHow=null;
 function maybeShowHow(then){
@@ -1396,7 +1533,7 @@ document.getElementById('howStart')?.addEventListener('click',()=>{
 
 /* ---------- 20. ESC 关闭覆盖层 ---------- */
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape')return;
-  ['memberScreen','loginScreen'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
+  ['memberScreen','loginScreen','birthScreen'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
 });
 </script>
 </body>
