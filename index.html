@@ -263,7 +263,10 @@ html[data-theme="light"] h1{background:linear-gradient(180deg,#5a4a2a,var(--gold
 @keyframes fcBreath{0%,100%{opacity:.16}50%{opacity:.46}}
 @keyframes fcSheen{0%{transform:translateX(-185%) skewX(-15deg)}54%,100%{transform:translateX(330%) skewX(-15deg)}}
 .fcard .fnum{position:absolute;inset:0;z-index:3;display:grid;place-items:center;font-size:44px;color:var(--gold);font-family:"Noto Serif SC",serif;text-shadow:0 0 18px #000;background:rgba(8,10,20,.42);border-radius:12px}
-@media(max-width:680px){ .fan-head{margin-top:1.8vh} .fan-arc{top:80vh;--R:38vh} .fcard{--w:108px} .fcard:hover{--lift:36px} .fcard.chosen{--lift:62px} }
+@media(max-width:680px){ .fan-head{margin-top:1.8vh} .fan-arc{top:80vh;--R:38vh} .fcard{--w:108px} .fcard:hover{--lift:36px} .fcard.chosen{--lift:62px}
+  /* 手机减负：去掉逐张呼吸光层、流光改普通混合（不再用昂贵的 mix-blend screen） */
+  .fcard::before{display:none} .fcard::after{mix-blend-mode:normal;background:linear-gradient(100deg,transparent 12%,rgba(255,244,214,.42) 50%,transparent 88%)} }
+@media(max-width:680px){ #heroBg{animation:none} #nebula{animation:none;opacity:.32} #heroVid{will-change:auto} }
 .fan-reshuffle{position:fixed;bottom:max(30px,calc(env(safe-area-inset-bottom) + 18px));left:50%;transform:translateX(-50%);z-index:7;padding:11px 26px;border:1px solid var(--gold-dim);background:rgba(8,10,20,.6);color:var(--gold);border-radius:22px;font-size:13.5px;cursor:pointer;font-family:inherit;backdrop-filter:blur(4px)}
 .fan-reshuffle:hover{background:rgba(231,201,138,.12)}
 .fan-close{position:fixed;top:22px;right:26px;z-index:7;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:rgba(8,10,20,.5);color:var(--text-dim);font-size:17px;cursor:pointer}
@@ -1205,7 +1208,7 @@ document.addEventListener('visibilitychange', updateHero);
 /* ---------- 16b. 玩法进入页 + 切换过渡 ---------- */
 const MODE_NOTE={
   daily:"今日一牌每天只抽一次 · 同一天无论问什么，抽到的都是同一张牌，作为今日的指引。",
-  triangle:"圣三角：从「过去·根源 / 现在·核心 / 未来·走向」三个维度，看清一件事的来龙去脉。",
+  triangle:"时光三牌：从「过去·根源 / 现在·核心 / 未来·走向」三个维度，看清一件事的来龙去脉。",
   love:"爱情占卜：分别照见「你的状态 / 对方的状态 / 关系走向」，适合感情中的困惑。",
   celtic:"凯尔特十字：十张牌全面铺开，剖析现状、阻碍、内心与最终结果，适合重大抉择。",
   yesno:"是与否：心中默念一个可用「是 / 否」回答的问题，让牌给你一个明确的指向。"

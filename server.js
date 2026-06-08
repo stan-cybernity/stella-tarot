@@ -98,15 +98,31 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  /* ---------- 静态文件 ---------- */
-  let rel = decodeURIComponent(u.pathname);
+  /* ---------- 静态文件（支持 HTTP Range：iOS/手机浏览器播放视频必需） ---------- */
+  let rel = decodeURIComponent(u.pathname.split('?')[0]);
   if (rel === '/' || rel === '') rel = '/index.html';
   const fp = path.join(__dirname, rel);
   if (!fp.startsWith(__dirname)) { res.writeHead(403); return res.end('forbidden'); }
-  fs.readFile(fp, (err, data) => {
-    if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('404 未找到：' + rel); }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(fp).toLowerCase()] || 'application/octet-stream' });
-    res.end(data);
+  fs.stat(fp, (err, st) => {
+    if (err || !st.isFile()) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('404 未找到：' + rel); }
+    const type = MIME[path.extname(fp).toLowerCase()] || 'application/octet-stream';
+    const total = st.size;
+    const head = { 'Content-Type': type, 'Accept-Ranges': 'bytes', 'Cache-Control': 'public, max-age=3600' };
+    if (req.method === 'HEAD') { res.writeHead(200, Object.assign({ 'Content-Length': total }, head)); return res.end(); }
+    const range = req.headers.range;
+    if (range) {
+      const m = /bytes=(\d*)-(\d*)/.exec(range);
+      let start = m && m[1] !== '' ? parseInt(m[1], 10) : 0;
+      let end = m && m[2] !== '' ? parseInt(m[2], 10) : total - 1;
+      if (isNaN(start)) start = 0;
+      if (isNaN(end) || end >= total) end = total - 1;
+      if (start > end || start >= total) { res.writeHead(416, { 'Content-Range': 'bytes */' + total }); return res.end(); }
+      res.writeHead(206, Object.assign({ 'Content-Range': `bytes ${start}-${end}/${total}`, 'Content-Length': end - start + 1 }, head));
+      const s = fs.createReadStream(fp, { start, end }); s.on('error', () => res.end()); s.pipe(res);
+    } else {
+      res.writeHead(200, Object.assign({ 'Content-Length': total }, head));
+      const s = fs.createReadStream(fp); s.on('error', () => res.end()); s.pipe(res);
+    }
   });
 });
 
