@@ -1,0 +1,12 @@
+{
+  "name": "stella-tarot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "星语塔罗 · Stella Tarot",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

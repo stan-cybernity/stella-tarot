@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: stella-tarot
+    runtime: node
+    plan: free
+    buildCommand: ""
+    startCommand: node server.js
+    envVars:
+      - key: DEEPSEEK_API_KEY
+        sync: false

@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>星语塔罗 · Stella Tarot — AI 塔罗占卜</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1426'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%23e7c98a'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<link rel="preload" as="image" href="assets/web/back.webp">
+<meta name="theme-color" content="#0b0a14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="星语塔罗">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;500&family=Cinzel:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+/* ================= 主题变量 ================= */
+:root{
+  --bg:#070a14; --bg2:#0d1426; --panel:rgba(16,23,44,.58);
+  --gold:#e7c98a; --gold-soft:#cdae72; --gold-dim:#8a7848;
+  --text:#eae8f3; --text-dim:#b3b8d2; --line:rgba(231,201,138,.20);
+  --iris1:#7ad9ff; --iris2:#e89bff; --iris3:#ffe07a;
+  --shadow:0 20px 60px rgba(0,0,0,.6);
+}
+html[data-theme="light"]{
+  --bg:#f1ebdf; --bg2:#fbf7ee; --panel:rgba(255,255,255,.78);
+  --gold:#9b7a2e; --gold-soft:#b08a35; --gold-dim:#cbb98a;
+  --text:#2a2438; --text-dim:#6b6480; --line:rgba(155,122,46,.25);
+  --shadow:0 20px 50px rgba(120,100,60,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Sans SC",system-ui,"Microsoft YaHei",sans-serif;
+  background:radial-gradient(1200px 760px at 50% -12%, var(--bg2), var(--bg) 62%);
+  color:var(--text);min-height:100vh;overflow-x:hidden;position:relative;transition:background .5s,color .5s}
+.serif{font-family:"Noto Serif SC","Songti SC",serif}
+.cinzel{font-family:"Cinzel","Noto Serif SC",serif;letter-spacing:2px}
+::selection{background:rgba(232,200,122,.3)}
+
+/* ================= 主视觉大图 + 蒙版 ================= */
+#heroBg{position:fixed;inset:0;z-index:0;background:#08070f url('assets/web/stella.webp') center top/cover no-repeat;animation:heroZoom 40s ease-in-out infinite alternate}
+#heroVid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:0;opacity:0;transition:opacity 1.4s ease}
+#heroVid.ready{opacity:1}
+@keyframes heroZoom{from{transform:scale(1)}to{transform:scale(1.08)}}
+#heroScrim{position:fixed;inset:0;z-index:0;background:
+  radial-gradient(118% 78% at 50% 30%, rgba(8,7,15,.32) 0%, rgba(8,7,15,.80) 100%),
+  linear-gradient(to bottom, rgba(8,7,15,.72) 0%, rgba(8,7,15,.38) 26%, rgba(8,7,15,.58) 58%, rgba(8,7,15,.99) 100%)}
+/* ================= 背景星空 ================= */
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+.star{position:absolute;background:var(--gold);border-radius:50%;opacity:.5;animation:tw 4s infinite ease-in-out}
+@keyframes tw{0%,100%{opacity:.12;transform:scale(.8)}50%{opacity:.85;transform:scale(1.25)}}
+#nebula{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background:
+    radial-gradient(600px 400px at 18% 22%, rgba(120,80,200,.18), transparent 70%),
+    radial-gradient(700px 500px at 82% 70%, rgba(200,120,160,.14), transparent 70%),
+    radial-gradient(500px 500px at 60% 18%, rgba(80,140,220,.12), transparent 70%);
+  animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-20px,18px,0) scale(1.08)}}
+
+/* ================= 开场动画（电影级入场） ================= */
+#intro{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;transition:opacity 1.1s ease;overflow:hidden;background:#05040b}
+#intro.gone{opacity:0;pointer-events:none}
+.intro-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#05040b;animation:introReveal 1.8s ease-out both}
+@keyframes introReveal{from{opacity:0;filter:blur(12px) brightness(.4)}to{opacity:1;filter:none}}
+.intro-veil{position:absolute;inset:0;background:
+  radial-gradient(135% 95% at 50% 38%, transparent 30%, rgba(5,4,11,.88) 100%),
+  linear-gradient(to bottom, rgba(5,4,11,.5), rgba(5,4,11,.15) 42%, rgba(5,4,11,.9))}
+.intro-content{position:relative;z-index:3;text-align:center;padding:0 24px}
+.intro-kicker{color:var(--gold-soft);letter-spacing:7px;font-size:12.5px;margin-bottom:20px;opacity:0;animation:riseIn 1.3s ease .4s both}
+.intro-title{font-size:clamp(40px,7.5vw,84px);font-weight:700;letter-spacing:7px;line-height:1.05;
+  background:linear-gradient(110deg,#8a7a4a 0%,#fff6d8 25%,var(--gold) 45%,#fff6d8 60%,#8a7a4a 100%);
+  background-size:240% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  animation:shine 5s linear infinite, riseIn 1.7s ease .7s both}
+@keyframes shine{to{background-position:240% center}}
+@keyframes riseIn{from{opacity:0;transform:translateY(28px);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+.intro-zh{margin-top:12px;color:#eee;letter-spacing:16px;font-size:clamp(16px,2.2vw,24px);opacity:0;
+  animation:riseIn 1.4s ease 1.2s both;text-shadow:0 2px 24px rgba(0,0,0,.85);padding-left:16px}
+.intro-tag{margin-top:18px;color:var(--text-dim);letter-spacing:5px;font-size:13px;opacity:0;animation:riseIn 1.4s ease 1.7s both}
+.intro-cta{margin-top:48px;opacity:0;transition:opacity 1s}
+.intro-cta.show{opacity:1}
+.enter-btn{padding:15px 46px;border:1px solid var(--gold);border-radius:32px;background:rgba(232,200,122,.06);
+  color:var(--gold);font-size:16px;letter-spacing:7px;cursor:pointer;font-family:"Noto Serif SC",serif;
+  animation:breathe 2.8s ease-in-out infinite;backdrop-filter:blur(4px)}
+.enter-btn:hover{background:rgba(232,200,122,.18);box-shadow:0 0 34px rgba(232,200,122,.45)}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 rgba(232,200,122,0)}50%{box-shadow:0 0 30px rgba(232,200,122,.42)}}
+#skipIntro{position:absolute;bottom:26px;right:28px;z-index:4;background:none;border:none;color:var(--text-dim);
+  font-size:13px;letter-spacing:2px;cursor:pointer;opacity:.6}
+#skipIntro:hover{opacity:1;color:var(--gold)}
+
+/* ================= 顶部导航 ================= */
+header{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;
+  padding:16px 28px;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:1px}
+.logo .mark{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 35% 30%,#2a2440,#0d0a18);border:1px solid var(--gold-dim);
+  box-shadow:0 0 20px rgba(232,200,122,.3);font-size:18px;animation:spin 30s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo .name{color:var(--gold);white-space:nowrap}
+nav{display:flex;gap:26px;font-size:14px}
+nav .item{position:relative;cursor:pointer;color:var(--text-dim);transition:color .2s;padding:6px 0}
+nav .item:hover{color:var(--gold)}
+nav .dd{position:absolute;top:130%;left:50%;transform:translateX(-50%) translateY(8px);
+  background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:8px;min-width:170px;
+  opacity:0;visibility:hidden;transition:.2s;box-shadow:var(--shadow);z-index:20}
+nav .item:hover .dd{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+nav .dd a{display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;color:var(--text);
+  font-size:13.5px;cursor:pointer;white-space:nowrap}
+nav .dd a:hover{background:rgba(232,200,122,.1);color:var(--gold)}
+.tools{display:flex;align-items:center;gap:12px}
+.icbtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:transparent;
+  color:var(--text-dim);cursor:pointer;display:grid;place-items:center;font-size:15px;transition:.2s}
+.icbtn:hover{color:var(--gold);border-color:var(--gold-dim)}
+.icbtn.live{color:var(--gold);border-color:var(--gold-dim);box-shadow:0 0 14px rgba(232,200,122,.3)}
+.coins{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--gold-dim);
+  border-radius:20px;color:var(--gold);font-size:13px;cursor:pointer}
+.ai-badge{display:none;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--gold-dim);
+  border-radius:20px;color:var(--gold);font-size:12px;background:rgba(232,200,122,.06)}
+.ai-badge.on{display:flex}
+.ai-badge .dot{width:7px;height:7px;border-radius:50%;background:#7ad99a;box-shadow:0 0 8px #7ad99a;animation:tw 1.6s infinite}
+
+/* ================= 主区 ================= */
+main{position:relative;z-index:3;max-width:900px;margin:0 auto;padding:74px 20px 120px;text-align:center}
+.welcome{color:var(--gold-soft);letter-spacing:5px;font-size:12.5px;text-transform:uppercase;margin-bottom:18px}
+h1{font-size:clamp(36px,6vw,60px);font-weight:700;letter-spacing:2px;
+  background:linear-gradient(180deg,#fff,var(--gold));-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;margin-bottom:14px}
+html[data-theme="light"] h1{background:linear-gradient(180deg,#5a4a2a,var(--gold));-webkit-background-clip:text;background-clip:text}
+.sub{color:var(--text-dim);font-size:15px;margin-bottom:36px}
+.ask{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;
+  box-shadow:var(--shadow);backdrop-filter:blur(12px);text-align:left;transition:border-color .3s;position:relative}
+.ask:focus-within{border-color:var(--gold-dim);box-shadow:0 0 40px rgba(232,200,122,.12),var(--shadow)}
+.ask textarea{width:100%;min-height:84px;background:transparent;border:none;outline:none;resize:none;
+  color:var(--text);font-size:16px;font-family:inherit;line-height:1.6}
+.ask textarea::placeholder{color:var(--text-dim)}
+.ask .row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:12px;border-top:1px solid var(--line)}
+.reader-sel{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--gold);cursor:pointer;position:relative;padding:6px 10px;border-radius:10px}
+.reader-sel:hover{background:rgba(232,200,122,.08)}
+.reader-sel .rav{width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,#4a3a7a,#1a1530);display:grid;place-items:center;font-size:13px}
+.rav img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.reader-dd{position:absolute;bottom:120%;left:0;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:8px;width:240px;box-shadow:var(--shadow);display:none;z-index:30}
+.reader-dd.open{display:block}
+.reader-dd .r{display:flex;gap:10px;align-items:flex-start;padding:9px;border-radius:10px;cursor:pointer}
+.reader-dd .r:hover{background:rgba(232,200,122,.1)}
+.reader-dd .r .rav{margin-top:2px;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,#4a3a7a,#1a1530);display:grid;place-items:center;font-size:13px}
+.reader-dd .r b{color:var(--gold);font-size:13.5px;font-weight:500}
+.reader-dd .r span{display:block;color:var(--text-dim);font-size:11.5px;margin-top:2px;line-height:1.4}
+.send{width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;font-size:18px;color:#1a1408;
+  background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));box-shadow:0 6px 20px rgba(232,200,122,.4);transition:transform .15s}
+.send:hover{transform:translateY(-2px) scale(1.05)}
+.send:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.quick{display:flex;gap:22px;justify-content:center;margin-top:18px;font-size:13.5px}
+.quick span{color:var(--text-dim);cursor:pointer;transition:color .2s}
+.quick span:hover,.quick span.on{color:var(--gold)}
+.modes-title{margin:50px 0 18px;color:var(--gold-soft);font-size:13px;letter-spacing:2px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.chip{padding:9px 16px;border:1px solid var(--line);border-radius:22px;font-size:13px;color:var(--text-dim);cursor:pointer;transition:.2s;display:flex;gap:7px;align-items:center}
+.chip:hover{border-color:var(--gold-dim);color:var(--gold);transform:translateY(-2px)}
+.chip.on{border-color:var(--gold);color:var(--gold);background:rgba(232,200,122,.08)}
+.chip small{color:var(--gold-dim)}
+
+/* ================= 结果区 ================= */
+#result{margin-top:48px;display:none}
+#result.show{display:block;animation:fade .6s}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.spread-name{color:var(--gold);font-size:15px;letter-spacing:3px;margin-bottom:6px}
+.q-echo{color:var(--text-dim);font-size:14px;margin-bottom:34px;font-style:italic}
+.cards{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;margin-bottom:14px;perspective:1200px}
+.cards.celtic{max-width:720px;margin-inline:auto}
+.cardbox{width:118px;position:relative;animation:deal .7s backwards}
+@keyframes deal{from{opacity:0;transform:translateY(-70px) scale(.6) rotate(-9deg)}to{opacity:1;transform:none}}
+.tilt{transition:transform .25s ease-out;transform-style:preserve-3d}
+.card{width:118px;height:198px;border-radius:13px;position:relative;transform-style:preserve-3d;
+  transition:transform .9s cubic-bezier(.4,.2,.2,1)}
+.card.flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:10px;border:1px solid var(--gold-dim);overflow:hidden}
+.back{background:#0d0a18 url('assets/web/back.webp') center/cover;color:var(--gold)}
+.front{transform:rotateY(180deg);text-align:center;gap:7px;
+  background:linear-gradient(160deg,#2a2147,#14101f);box-shadow:inset 0 0 30px rgba(0,0,0,.5)}
+.front .frame{position:absolute;inset:6px;border:1px solid var(--gold-dim);border-radius:9px;opacity:.6;pointer-events:none}
+.front .sym{font-size:46px;line-height:1;filter:drop-shadow(0 0 10px rgba(232,200,122,.4));transition:transform .4s;z-index:2}
+.front.rev .sym{transform:rotate(180deg)}
+.front .cn{font-size:14.5px;color:var(--gold);font-weight:500;z-index:2}
+.front .en{font-size:9.5px;color:var(--text-dim);letter-spacing:.5px;z-index:2}
+.front .ori{font-size:10.5px;padding:2px 9px;border-radius:10px;border:1px solid var(--line);color:var(--text-dim);z-index:2}
+.front .ori.r{color:#e0a0a0;border-color:rgba(224,160,160,.45)}
+/* 真实牌图（即梦生成） */
+.front .art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:13px;z-index:0}
+.front.rev .art{transform:rotate(180deg)}
+.front.hasart{justify-content:flex-end}
+.front.hasart .sym,.front.hasart .frame{display:none}
+.front.hasart::after{content:"";position:absolute;left:0;right:0;bottom:0;height:42%;z-index:1;border-radius:0 0 13px 13px;background:linear-gradient(to top,rgba(8,7,15,.94),rgba(8,7,15,.45) 55%,transparent);pointer-events:none}
+.front.hasart .cn,.front.hasart .en,.front.hasart .ori{position:relative;z-index:2;text-shadow:0 1px 5px rgba(0,0,0,.9)}
+/* 全息流光 */
+.front .holo{position:absolute;inset:0;border-radius:13px;pointer-events:none;z-index:1;opacity:.0;transition:opacity .3s;mix-blend-mode:screen;
+  background:linear-gradient(115deg,transparent 18%,rgba(122,217,255,.25) 34%,rgba(232,155,255,.32) 50%,rgba(255,224,122,.30) 66%,transparent 82%);
+  background-size:280% 280%;background-position:var(--mx,50%) var(--my,50%)}
+.front .glow{position:absolute;inset:0;border-radius:13px;pointer-events:none;z-index:1;opacity:0;transition:opacity .3s;mix-blend-mode:screen;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.4),transparent 42%)}
+.card.flip .front .holo{opacity:.75}
+.card.flip:hover .front .glow{opacity:.7}
+.pos-label{text-align:center;font-size:12px;color:var(--text-dim);margin-top:12px;min-height:30px;line-height:1.4}
+/* 翻牌粒子 */
+.spark{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);pointer-events:none;z-index:9;
+  animation:spark .9s ease-out forwards}
+@keyframes spark{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}}
+/* Yes/No 裁决 */
+.verdict{font-size:66px;font-weight:700;letter-spacing:6px;margin:8px 0;animation:riseIn .8s ease both}
+.verdict.yes{color:#7ad99a;text-shadow:0 0 30px rgba(122,217,154,.5)}
+.verdict.no{color:#e0a0a0;text-shadow:0 0 30px rgba(224,160,160,.5)}
+.verdict.maybe{color:var(--gold);text-shadow:0 0 30px rgba(232,200,122,.5)}
+/* 解读面板 */
+.reading{max-width:700px;margin:32px auto 0;text-align:left;background:var(--panel);border:1px solid var(--line);
+  border-radius:18px;padding:28px 30px;line-height:2;font-size:15px;backdrop-filter:blur(12px);
+  box-shadow:var(--shadow),inset 0 0 60px rgba(232,200,122,.04);position:relative}
+.reading .rhead{display:flex;align-items:center;gap:10px;margin-bottom:16px;color:var(--gold);font-size:14px}
+.reading .rhead .rav{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,#4a3a7a,#1a1530);display:grid;place-items:center}
+.reading p{margin:0 0 14px;color:var(--text)}
+.reading .pos{color:var(--gold);font-weight:500;font-family:"Noto Serif SC",serif}
+.reading .mean{color:var(--text-dim)}
+.reading hr{border:none;border-top:1px solid var(--line);margin:18px 0}
+.reading .advice{color:var(--gold-soft);font-family:"Noto Serif SC",serif}
+.cursor{display:inline-block;width:8px;height:17px;background:var(--gold);margin-left:2px;vertical-align:-2px;animation:blink .8s steps(2) infinite}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+.loading{color:var(--text-dim);font-size:14px;margin-top:20px}
+.dots::after{content:"";animation:dots 1.4s infinite}
+@keyframes dots{0%{content:"·"}33%{content:"··"}66%{content:"···"}}
+.again{margin-top:28px;padding:11px 28px;border:1px solid var(--gold-dim);background:transparent;color:var(--gold);border-radius:22px;cursor:pointer;font-size:14px;font-family:inherit;transition:.2s}
+.again:hover{background:rgba(232,200,122,.1);box-shadow:0 0 20px rgba(232,200,122,.2)}
+
+/* ================= 设置弹窗 ================= */
+/* ===== 扇形抽牌（大、占上方主视觉） ===== */
+#drawFan{position:fixed;inset:0;z-index:160;display:none;flex-direction:column;align-items:center;
+  background:radial-gradient(110% 85% at 50% 24%, #101a38, #06080f 74%);overflow:hidden}
+#drawFan.open{display:flex;animation:fade .45s}
+.fan-head{text-align:center;margin-top:2.6vh;z-index:3;pointer-events:none}
+.fan-tagline{color:var(--gold-soft);letter-spacing:6px;font-size:clamp(15px,1.7vw,19px)}
+.fan-bignum{font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.1;margin-top:2px;
+  background:linear-gradient(180deg,#fff,var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.fan-hint{color:var(--text-dim);font-size:13px;margin-top:6px;letter-spacing:1px}
+.fan-arc{position:fixed;left:50%;top:125vh;z-index:2;--R:103vh}
+.fcard{--w:150px;position:absolute;width:var(--w);height:calc(var(--w)*1.58);left:0;top:0;border-radius:12px;overflow:hidden;
+  background:#0d1426 url('assets/web/back.webp') center/cover;border:1px solid var(--gold-dim);
+  transform-origin:0 0;transform:rotate(var(--deg)) translate(calc(var(--w)/-2), calc(-1*var(--R) - var(--lift,0px)));
+  transition:transform .32s cubic-bezier(.3,.7,.3,1), box-shadow .32s, filter .32s;cursor:pointer;box-shadow:0 12px 34px rgba(0,0,0,.6)}
+.fcard:hover{--lift:46px;filter:brightness(1.22);box-shadow:0 0 38px rgba(231,201,138,.5);z-index:5}
+.fcard.chosen{--lift:86px;border-color:var(--gold);box-shadow:0 0 46px rgba(231,201,138,.8);z-index:6}
+/* 牌背内在金光 · 缓缓呼吸（像活物） */
+.fcard::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(125% 78% at 50% 28%, rgba(255,228,156,.26), transparent 70%);
+  mix-blend-mode:screen;animation:fcBreath 3.8s ease-in-out infinite;animation-delay:var(--sheen-delay,0s)}
+/* 牌背流光 · 斜向扫过（整扇波浪式划过） */
+.fcard::after{content:"";position:absolute;top:-22%;left:0;width:55%;height:144%;z-index:2;pointer-events:none;
+  background:linear-gradient(100deg, transparent 6%, rgba(255,246,220,.62) 50%, transparent 94%);
+  mix-blend-mode:screen;transform:translateX(-185%) skewX(-15deg);
+  animation:fcSheen 5.6s linear infinite;animation-delay:var(--sheen-delay,0s)}
+.fcard.chosen::before{animation-duration:2.4s;background:radial-gradient(125% 78% at 50% 28%, rgba(255,232,168,.4), transparent 72%)}
+@keyframes fcBreath{0%,100%{opacity:.16}50%{opacity:.46}}
+@keyframes fcSheen{0%{transform:translateX(-185%) skewX(-15deg)}54%,100%{transform:translateX(330%) skewX(-15deg)}}
+.fcard .fnum{position:absolute;inset:0;z-index:3;display:grid;place-items:center;font-size:44px;color:var(--gold);font-family:"Noto Serif SC",serif;text-shadow:0 0 18px #000;background:rgba(8,10,20,.42);border-radius:12px}
+@media(max-width:680px){ .fan-head{margin-top:1.8vh} .fan-arc{top:78vh;--R:34vh} .fcard{--w:118px} .fcard:hover{--lift:30px} .fcard.chosen{--lift:54px} }
+.fan-reshuffle{position:fixed;bottom:max(30px,calc(env(safe-area-inset-bottom) + 18px));left:50%;transform:translateX(-50%);z-index:7;padding:11px 26px;border:1px solid var(--gold-dim);background:rgba(8,10,20,.6);color:var(--gold);border-radius:22px;font-size:13.5px;cursor:pointer;font-family:inherit;backdrop-filter:blur(4px)}
+.fan-reshuffle:hover{background:rgba(231,201,138,.12)}
+.fan-close{position:fixed;top:22px;right:26px;z-index:7;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:rgba(8,10,20,.5);color:var(--text-dim);font-size:17px;cursor:pointer}
+.fan-close:hover{color:var(--gold)}
+/* ===== 选择塔罗师 五人页 ===== */
+#readerScreen{position:fixed;inset:0;z-index:150;display:none;flex-direction:column;padding:46px 5vw 60px;overflow-y:auto;
+  background:rgba(5,4,11,.94) url('assets/web/corridor.webp') center/cover fixed;backdrop-filter:blur(2px)}
+#readerScreen::before{content:"";position:fixed;inset:0;z-index:-1;background:rgba(6,5,14,.86)}
+#readerScreen.open{display:flex;animation:fade .45s}
+.rs-head{display:flex;justify-content:space-between;align-items:flex-start;max-width:1180px;margin:0 auto 34px;width:100%}
+.rs-kicker{color:var(--gold-soft);letter-spacing:5px;font-size:12px;margin-bottom:10px}
+.rs-title{font-size:clamp(26px,4vw,38px);color:var(--gold)}
+.rs-sub{color:var(--text-dim);font-size:13.5px;margin-top:8px;max-width:560px;line-height:1.6}
+.rs-close{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--text-dim);font-size:18px;cursor:pointer;flex-shrink:0}
+.rs-close:hover{color:var(--gold);border-color:var(--gold-dim)}
+.rs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:20px;max-width:1180px;margin:0 auto;width:100%}
+.rs-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:.25s;backdrop-filter:blur(8px)}
+.rs-card:hover{border-color:var(--gold-dim);transform:translateY(-5px);box-shadow:0 24px 55px rgba(0,0,0,.55)}
+.rs-card.cur{border-color:var(--gold)}
+.rs-portrait{aspect-ratio:1/1;background-size:cover;background-position:center 18%;position:relative}
+.rs-portrait::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--panel) 4%,transparent 55%)}
+.rs-vip{position:absolute;top:10px;right:10px;z-index:2;background:rgba(5,4,11,.6);border:1px solid var(--gold-dim);color:var(--gold);font-size:11px;padding:3px 9px;border-radius:20px}
+.rs-body{padding:4px 18px 18px;position:relative;z-index:2;display:flex;flex-direction:column;flex:1}
+.rs-name{font-size:21px;color:var(--gold)}
+.rs-meta{color:var(--gold-soft);font-size:12px;margin:4px 0 10px;letter-spacing:.5px}
+.rs-blurb{color:var(--text-dim);font-size:12.5px;line-height:1.75;flex:1}
+.rs-btn{margin-top:14px;width:100%;padding:11px;border-radius:12px;border:none;font-size:14px;cursor:pointer;font-family:inherit;transition:.2s}
+.rs-btn.free{background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408}
+.rs-btn.free:hover{box-shadow:0 6px 20px rgba(232,200,122,.4)}
+.rs-btn.vip{background:transparent;border:1px solid var(--gold-dim);color:var(--gold)}
+.rs-btn.vip:hover{background:rgba(232,200,122,.1)}
+.rs-btn.cur{background:transparent;border:1px solid var(--line);color:var(--text-dim);cursor:default}
+.toast{position:fixed;left:50%;bottom:60px;transform:translateX(-50%);z-index:300;background:rgba(20,16,30,.95);border:1px solid var(--gold-dim);
+  color:var(--gold);padding:12px 22px;border-radius:24px;font-size:13.5px;box-shadow:var(--shadow);opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;display:none;align-items:center;justify-content:center;backdrop-filter:blur(5px)}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:28px;width:min(460px,92vw);box-shadow:var(--shadow);text-align:left}
+.modal h3{color:var(--gold);font-size:18px;margin-bottom:6px}
+.modal .hint{color:var(--text-dim);font-size:12.5px;line-height:1.7;margin-bottom:8px}
+.modal .status{display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);font-size:13px;margin:14px 0}
+.modal .status.ok{color:#7ad99a;border-color:rgba(122,217,154,.35);background:rgba(122,217,154,.06)}
+.modal .status.off{color:var(--text-dim)}
+.modal label{display:block;font-size:13px;color:var(--text-dim);margin:14px 0 6px}
+.modal input{width:100%;padding:11px 13px;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--text);font-size:14px;font-family:inherit}
+.modal .actions{display:flex;gap:10px;margin-top:22px}
+.modal button{flex:1;padding:11px;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;border:1px solid var(--line)}
+.modal .save{background:var(--gold-soft);color:#1a1408;border:none;font-weight:500}
+.modal .cancel{background:transparent;color:var(--text-dim)}
+.warn{color:#d9a86c;font-size:11.5px;margin-top:10px;line-height:1.5}
+footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-size:12px;padding:30px;opacity:.7}
+.fab{position:fixed;right:18px;bottom:18px;z-index:40;display:flex;flex-direction:column;gap:10px}
+.fab button{padding:9px 16px;border-radius:22px;border:1px solid var(--line);background:var(--bg2);color:var(--text-dim);font-size:12.5px;cursor:pointer;box-shadow:var(--shadow)}
+.fab button:hover{color:var(--gold)}
+@media(max-width:640px){nav{display:none}.cardbox{width:96px}.card{width:96px;height:162px}.cards{gap:14px}
+  header{padding:12px 15px}.tools{gap:9px}.logo{gap:8px}.logo .name{font-size:15px}.logo .mark{width:32px;height:32px;font-size:16px}#theme,#settings{display:none}}
+
+/* ===== 头部：会员 + 登录入口 ===== */
+.btn-vip{display:flex;align-items:center;gap:5px;padding:6px 13px;border:1px solid var(--gold-dim);border-radius:20px;background:linear-gradient(180deg,rgba(231,201,138,.15),transparent);color:var(--gold);font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.btn-vip:hover{background:rgba(231,201,138,.18)}
+.btn-login{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(8,10,20,.4);color:var(--text-dim);cursor:pointer;display:grid;place-items:center}
+.btn-login:hover{color:var(--gold);border-color:var(--gold-dim)}
+@media(max-width:640px){ .btn-vip{padding:6px 10px;font-size:12px} }
+
+/* ===== 全屏覆盖层：会员 / 登录 ===== */
+#memberScreen,#loginScreen{position:fixed;inset:0;z-index:158;display:none;flex-direction:column;padding:54px 5vw 60px;overflow-y:auto;
+  background:rgba(5,4,11,.95) url('assets/web/corridor.webp') center/cover fixed}
+#memberScreen::before,#loginScreen::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(125% 95% at 50% -5%, rgba(16,23,44,.78), rgba(6,5,14,.96) 68%)}
+#memberScreen.open,#loginScreen.open{display:flex;animation:fade .45s}
+.ov-close{position:fixed;top:22px;right:26px;z-index:6;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--text-dim);font-size:18px;cursor:pointer}
+.ov-close:hover{color:var(--gold);border-color:var(--gold-dim)}
+
+/* 会员页 */
+.mb-head{text-align:center;max-width:760px;margin:4px auto 34px}
+.mb-kicker{color:var(--gold-soft);letter-spacing:6px;font-size:12px;margin-bottom:12px}
+.mb-title{font-size:clamp(26px,4vw,40px);color:var(--gold)}
+.mb-sub{color:var(--text-dim);font-size:14px;margin-top:12px;line-height:1.7}
+.mb-toggle{display:inline-flex;margin:24px auto 0;border:1px solid var(--line);border-radius:24px;padding:4px;gap:4px;background:rgba(8,10,20,.5)}
+.mb-toggle button{padding:8px 22px;border-radius:20px;border:none;background:transparent;color:var(--text-dim);font-size:13px;cursor:pointer;font-family:inherit;transition:.2s}
+.mb-toggle button.on{background:var(--gold-soft);color:#1a1408;font-weight:500}
+.mb-save{color:#1a1408;font-size:11px;margin-left:5px;opacity:.85}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:22px;max-width:1040px;margin:0 auto;width:100%;align-items:stretch}
+.plan{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:32px 26px 26px;display:flex;flex-direction:column;backdrop-filter:blur(10px);transition:.25s}
+.plan:hover{transform:translateY(-5px);box-shadow:0 26px 60px rgba(0,0,0,.55)}
+.plan.feat{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold-dim),0 26px 60px rgba(0,0,0,.5)}
+.plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408;font-size:11px;font-weight:600;padding:4px 14px;border-radius:20px;letter-spacing:1px;white-space:nowrap}
+.plan-name{font-size:14px;color:var(--gold-soft)}
+.plan-price{font-size:38px;color:var(--gold);font-family:"Cinzel",serif;margin:14px 0 2px;line-height:1}
+.plan-price small{font-size:14px;color:var(--text-dim);font-family:"Noto Sans SC",sans-serif}
+.plan-note{color:var(--text-dim);font-size:12px;min-height:18px;margin-bottom:4px}
+.plan ul{list-style:none;margin:18px 0 22px;flex:1;display:flex;flex-direction:column;gap:11px}
+.plan li{color:var(--text);font-size:13px;line-height:1.5;display:flex;gap:9px;align-items:flex-start}
+.plan li::before{content:"✦";color:var(--gold-soft);flex-shrink:0;font-size:10px;margin-top:3px}
+.plan li.off{color:var(--text-dim);opacity:.45}
+.plan li.off::before{content:"·";color:var(--text-dim);font-size:14px;margin-top:0}
+.plan-btn{padding:13px;border-radius:13px;border:none;font-size:14.5px;cursor:pointer;font-family:inherit;transition:.2s;font-weight:500}
+.plan-btn.cur{background:transparent;border:1px solid var(--line);color:var(--text-dim);cursor:default}
+.plan-btn.go{background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408}
+.plan-btn.go:hover{box-shadow:0 8px 24px rgba(232,200,122,.4)}
+.plan-btn.ghost{background:transparent;border:1px solid var(--gold-dim);color:var(--gold)}
+.plan-btn.ghost:hover{background:rgba(232,200,122,.1)}
+.mb-foot{text-align:center;color:var(--text-dim);font-size:11.5px;margin:32px auto 0;max-width:620px;line-height:1.7}
+
+/* 登录页 */
+.login-wrap{margin:auto;width:min(400px,92vw);text-align:center}
+.login-mark{width:64px;height:64px;border-radius:50%;border:1px solid var(--gold-dim);display:grid;place-items:center;font-size:28px;color:var(--gold);margin:0 auto 20px;background:radial-gradient(circle at 40% 30%,rgba(231,201,138,.2),transparent)}
+.login-title{font-size:26px;color:var(--gold)}
+.login-sub{color:var(--text-dim);font-size:13.5px;margin:11px 0 30px;line-height:1.6}
+.login-field{text-align:left;margin-bottom:16px}
+.login-field label{display:block;font-size:12.5px;color:var(--text-dim);margin-bottom:7px;letter-spacing:.5px}
+.login-field input{width:100%;padding:13px 15px;background:rgba(8,10,20,.6);border:1px solid var(--line);border-radius:12px;color:var(--text);font-size:14.5px;font-family:inherit;transition:.2s}
+.login-field input:focus{outline:none;border-color:var(--gold-dim)}
+.login-primary{width:100%;padding:14px;border-radius:13px;border:none;background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:2px}
+.login-primary:hover{box-shadow:0 8px 24px rgba(232,200,122,.4)}
+.login-or{display:flex;align-items:center;gap:14px;color:var(--text-dim);font-size:12px;margin:22px 0}
+.login-or::before,.login-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.login-social{display:flex;flex-direction:column;gap:11px}
+.soc-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font-size:14px;cursor:pointer;font-family:inherit;transition:.2s}
+.soc-btn:hover{border-color:var(--gold-dim);background:rgba(255,255,255,.07)}
+.soc-btn .ico{width:18px;height:18px;flex-shrink:0}
+.login-fine{color:var(--text-dim);font-size:11px;margin-top:26px;line-height:1.7}
+.login-fine a{color:var(--gold-soft);text-decoration:none;border-bottom:1px solid var(--line)}
+
+/* 玩法说明 3步 */
+.how-steps{display:flex;flex-direction:column;gap:16px;margin:20px 0 6px;text-align:left}
+.how-step{display:flex;gap:14px;align-items:flex-start}
+.how-num{width:34px;height:34px;flex-shrink:0;border-radius:50%;border:1px solid var(--gold-dim);display:grid;place-items:center;color:var(--gold);font-family:"Cinzel",serif;font-size:15px}
+.how-step b{color:var(--text);font-size:14.5px;display:block;margin-bottom:3px}
+.how-step span{color:var(--text-dim);font-size:12.5px;line-height:1.55}
+.how-check{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--text-dim);font-size:12.5px;margin-top:20px;cursor:pointer;user-select:none}
+.how-check input{width:15px;height:15px;accent-color:var(--gold-soft)}
+
+/* ===== 开场：轻触开声提示 ===== */
+.intro-soundhint{position:absolute;bottom:78px;left:50%;transform:translateX(-50%);z-index:6;color:var(--gold-soft);font-size:13px;letter-spacing:2px;opacity:0;transition:opacity .8s;pointer-events:none}
+.intro-soundhint.show{opacity:.85;animation:hintPulse 2.6s ease-in-out infinite}
+.intro-soundhint.gone{opacity:0!important;animation:none}
+@keyframes hintPulse{0%,100%{opacity:.45}50%{opacity:.92}}
+
+/* ===== 玩法进入页 ===== */
+#modeScreen{position:fixed;inset:0;z-index:140;display:none;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:6vh 5vw 5vh;overflow-y:auto;background:radial-gradient(120% 90% at 50% 0%, rgba(12,18,38,.95), rgba(5,5,12,.99) 66%)}
+#modeScreen::before{content:"";position:fixed;inset:0;z-index:-1;background:#06050e url('assets/web/corridor.webp') center/cover fixed;opacity:.16}
+#modeScreen.open{display:flex;animation:fade .5s}
+.ms-wrap{width:min(560px,94vw);text-align:center;margin:auto 0}
+.ms-kicker{color:var(--gold-soft);letter-spacing:4px;font-size:13px;opacity:.85}
+.ms-title{font-size:clamp(34px,6vw,52px);color:var(--gold);margin-top:8px;line-height:1.1}
+.ms-rule{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);margin:18px auto 22px}
+.ms-readers{display:flex;align-items:center;justify-content:center;gap:8px}
+.ms-arrow{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:rgba(8,10,20,.4);color:var(--gold-soft);font-size:20px;cursor:pointer;flex-shrink:0;line-height:1;transition:.2s}
+.ms-arrow:hover{color:var(--gold);border-color:var(--gold-dim)}
+.ms-avatars{display:flex;align-items:center;gap:10px}
+.ms-av{width:52px;height:52px;border-radius:50%;overflow:hidden;border:1px solid var(--line);cursor:pointer;opacity:.5;transition:.25s;flex-shrink:0;background:#0d1426}
+.ms-av img{width:100%;height:100%;object-fit:cover}
+.ms-av:hover{opacity:.85}
+.ms-av.sel{width:74px;height:74px;opacity:1;border-color:var(--gold);box-shadow:0 0 22px rgba(231,201,138,.5)}
+.ms-readername{font-size:21px;color:var(--gold);margin-top:16px}
+.ms-readermeta{color:var(--gold-soft);font-size:12.5px;margin-top:4px;letter-spacing:.5px}
+.ms-ask{position:relative;margin:22px 0 4px}
+.ms-ask textarea{width:100%;min-height:62px;resize:none;padding:15px 17px;background:rgba(8,10,20,.55);border:1px solid var(--line);border-radius:16px;color:var(--text);font-size:15px;font-family:inherit;line-height:1.5}
+.ms-ask textarea:focus{outline:none;border-color:var(--gold-dim)}
+.ms-count{text-align:right;color:var(--text-dim);font-size:11.5px;margin-top:6px}
+.ms-draw{width:100%;max-width:300px;margin:14px auto 0;display:block;padding:14px;border-radius:30px;border:none;background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408;font-size:16px;font-weight:600;letter-spacing:3px;cursor:pointer;font-family:inherit}
+.ms-draw:hover{box-shadow:0 10px 30px rgba(232,200,122,.45)}
+.ms-skip{background:none;border:none;color:var(--text-dim);font-size:13px;cursor:pointer;margin-top:14px;font-family:inherit}
+.ms-skip:hover{color:var(--gold-soft)}
+.ms-cost{color:var(--gold-soft);font-size:12.5px;margin-top:14px;letter-spacing:.5px}
+.ms-cost b{color:var(--gold)}
+.ms-note{display:flex;gap:9px;align-items:flex-start;text-align:left;color:var(--text-dim);font-size:12.5px;line-height:1.55;background:rgba(231,201,138,.06);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:18px auto 0;max-width:440px}
+.ms-note .i{color:var(--gold-soft);flex-shrink:0}
+.ms-friend{color:var(--text-dim);font-size:12px;margin-top:20px}
+.ms-friend a{color:var(--gold-soft);cursor:pointer;text-decoration:none;border-bottom:1px solid var(--line)}
+@media(max-width:640px){ .ms-av{width:44px;height:44px} .ms-av.sel{width:62px;height:62px} .ms-title{font-size:36px} }
+
+/* ===== 切换加载 / 过渡 ===== */
+#screenLoad{position:fixed;inset:0;z-index:240;display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px;
+  background:radial-gradient(80% 60% at 50% 50%, rgba(12,18,40,.97), rgba(4,5,12,.99))}
+#screenLoad.show{display:flex;animation:fade .3s}
+.sl-sigil{width:86px;height:86px;position:relative}
+.sl-sigil i{position:absolute;border-radius:50%;border:1px solid transparent}
+.sl-sigil i:nth-child(1){inset:0;border-top-color:var(--gold);border-right-color:var(--gold);animation:slSpin 1.1s linear infinite}
+.sl-sigil i:nth-child(2){inset:14px;border-bottom-color:var(--gold-soft);border-left-color:var(--gold-soft);animation:slSpin 1.7s linear infinite reverse}
+.sl-star{position:absolute;inset:0;display:grid;place-items:center;color:var(--gold);font-size:24px;animation:hintPulse 1.4s ease-in-out infinite}
+.sl-label{color:var(--gold-soft);font-size:14px;letter-spacing:4px}
+@keyframes slSpin{to{transform:rotate(360deg)}}
+
+/* ===== 解读：牌位点题 + 免责声明 + 可读性 ===== */
+.rlead{color:var(--gold);font-weight:500;font-family:"Noto Serif SC",serif}
+.reading-disclaimer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--text-dim);font-size:12px;line-height:1.6;text-align:center;opacity:.92}
+.reading p{font-size:15.5px;line-height:1.95;color:#e7e6f2}
+.reading .rhead{font-size:15px}
+@media(max-width:640px){ .reading p{font-size:15px;line-height:1.9} }
+</style>
+</head>
+<body>
+<div id="heroBg"></div>
+<video id="heroVid" src="hero.mp4" autoplay muted loop playsinline></video>
+<div id="heroScrim"></div>
+<div id="nebula"></div>
+<div id="stars"></div>
+
+<!-- ===== 开场动画 ===== -->
+<div id="intro">
+  <video class="intro-bg" id="introVid" src="intro.mp4" autoplay muted loop playsinline></video>
+  <div class="intro-veil"></div>
+  <div class="intro-content">
+    <div class="intro-kicker cinzel">THE CORRIDOR OF FATE · 命运回廊为你开启</div>
+    <div class="intro-title cinzel">STELLA TAROT</div>
+    <div class="intro-zh serif">星 语 塔 罗</div>
+    <div class="intro-tag">叩问命运 · 照见自己</div>
+    <div class="intro-cta" id="introCta"><button class="enter-btn" id="enterBtn">✦ 推 门 进 入 ✦</button></div>
+  </div>
+  <div class="intro-soundhint" id="introSoundHint">♪ 轻触画面 · 开启声音</div>
+  <button id="skipIntro">跳过 →</button>
+</div>
+
+<header>
+  <div class="logo"><div class="mark">✦</div><span class="name serif">星语塔罗</span></div>
+  <nav id="nav"></nav>
+  <div class="tools">
+    <button class="btn-vip" id="goVip">✦ 会员</button>
+    <button class="icbtn" id="theme" title="切换主题">🌙</button>
+    <button class="icbtn" id="sound" title="音乐">🔊</button>
+    <div class="coins" id="coins">✦ <span id="coinNum">88</span></div>
+    <button class="btn-login" id="goLogin" title="登录"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" stroke-linecap="round"/></svg></button>
+    <button class="icbtn" id="settings" title="AI 设置">⚙</button>
+  </div>
+</header>
+
+<main>
+  <div class="welcome cinzel">WELCOME TO STELLA TAROT</div>
+  <h1 class="serif" id="heroTitle">让牌面照见你心</h1>
+  <p class="sub" id="heroSub">答案一直在你心里 · 只是还没被看见</p>
+
+  <div class="ask">
+    <textarea id="question" placeholder="此刻，你心里最想问的是什么？（例如：我现在有点乱，下一步该怎么走？/ 这段关系该何去何从？/ 我该把重心放在哪里？）"></textarea>
+    <div class="row">
+      <div class="reader-sel" id="readerSel">
+        <div class="rav" id="readerAv">✦</div>
+        <span id="readerName">选择塔罗师</span> ▾
+        <div class="reader-dd" id="readerDd"></div>
+      </div>
+      <button class="send" id="send" title="开始占卜">↑</button>
+    </div>
+  </div>
+
+  <div class="quick" id="quick"></div>
+  <div class="modes-title serif">✦ 本周热门玩法</div>
+  <div class="chips" id="chips"></div>
+
+  <div id="result">
+    <div class="spread-name serif" id="spreadName"></div>
+    <div class="q-echo" id="qEcho"></div>
+    <div id="verdictBox"></div>
+    <div class="cards" id="cards"></div>
+    <div id="readingBox"></div>
+    <button class="again" id="again">↺ 再占一次</button>
+  </div>
+</main>
+
+<!-- ===== 扇形抽牌仪式 ===== -->
+<div id="drawFan">
+  <div class="fan-head">
+    <p class="fan-tagline serif">让直觉替你选牌</p>
+    <div class="fan-bignum cinzel" id="fanBig"></div>
+    <p class="fan-hint" id="fanHint"></p>
+  </div>
+  <div class="fan-arc" id="fanArc"></div>
+  <button class="fan-reshuffle" id="fanReshuffle">↻ 重新洗牌</button>
+  <button class="fan-close" id="fanClose">✕</button>
+</div>
+
+<!-- ===== 选择塔罗师（五位） ===== -->
+<div id="readerScreen">
+  <div class="rs-head">
+    <div>
+      <div class="rs-kicker cinzel">CHOOSE YOUR ORACLE</div>
+      <h2 class="rs-title serif">叩响一扇门</h2>
+      <p class="rs-sub">五位塔罗师，各有前世今生。选一位与你共鸣的，由 TA 为你解读 · 随时可换</p>
+    </div>
+    <button class="rs-close" id="rsClose">✕</button>
+  </div>
+  <div class="rs-grid" id="rsGrid"></div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>AI 解读设置</h3>
+    <div class="status off" id="aiStatus">正在检测 AI 服务…</div>
+    <p class="hint">推荐通过 <b>启动.bat</b> 运行：本地服务会用你 .env 里的 DeepSeek 密钥做<b>流式解读</b>，密钥不进浏览器、不暴露。<br>若你直接双击打开了 index.html（地址栏是 file://），可在下方手动填 Key 作为备用（可能受跨域限制）。</p>
+    <label>API 接口地址 (Base URL)</label>
+    <input id="baseUrl" placeholder="https://api.deepseek.com" value="https://api.deepseek.com">
+    <label>模型名称</label>
+    <input id="model" placeholder="deepseek-chat" value="deepseek-chat">
+    <label>API Key（仅存于本机浏览器）</label>
+    <input id="apiKey" type="password" placeholder="sk-...">
+    <p class="warn">⚠ 浏览器直连会暴露 Key，仅适合自己本机。失败会自动回退到内置解读。</p>
+    <div class="actions">
+      <button class="cancel" id="cancelSet">取消</button>
+      <button class="save" id="saveSet">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 会员 / 订阅 ===== -->
+<div id="memberScreen">
+  <button class="ov-close" id="mbClose">✕</button>
+  <div class="mb-head">
+    <div class="mb-kicker cinzel">UNLOCK THE BOOK OF FATE</div>
+    <h2 class="mb-title serif">开启你的命运之书</h2>
+    <p class="mb-sub">免费即可占卜。开通会员，解锁电影级深度解读、全部塔罗师与无限星币——让每一次叩问都更深一层。</p>
+    <div class="mb-toggle" id="mbToggle">
+      <button data-cycle="month" class="on">按月</button>
+      <button data-cycle="year">按年<span class="mb-save">省 30%</span></button>
+    </div>
+  </div>
+  <div class="plans" id="plans"></div>
+  <p class="mb-foot"><b style="color:var(--gold-soft)">星币 vs 会员：</b>星币是每日登录免费赠送的占卜额度，单次占卜消耗少量星币、<b>不花真钱</b>；开通会员＝星币管够、解读更深、解锁更多塔罗师。免费也能完整占卜，会员只为想走得更深的人。<br>订阅可随时取消，未到期权益保留。当前为演示界面，支付与账户功能将在正式版开放（计划接入微信 / 支付宝 / Stripe）。</p>
+</div>
+
+<!-- ===== 登录 ===== -->
+<div id="loginScreen">
+  <button class="ov-close" id="lgClose">✕</button>
+  <div class="login-wrap">
+    <div class="login-mark cinzel">✦</div>
+    <h2 class="login-title serif">登录星语塔罗</h2>
+    <p class="login-sub">登录后，命运之书会记住你的每一次占卜与成长轨迹。</p>
+    <div class="login-field">
+      <label>邮箱</label>
+      <input id="lgEmail" type="email" placeholder="you@example.com" autocomplete="off">
+    </div>
+    <button class="login-primary" id="lgSend">✦ 发送登录链接</button>
+    <div class="login-or">或</div>
+    <div class="login-social">
+      <button class="soc-btn" data-soc="Google"><svg class="ico" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.5 13.3l7.9 6.1C12.3 13.2 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 3-2.2 5.5-4.7 7.2l7.3 5.7C43.7 37.9 46.5 31.8 46.5 24.5z"/><path fill="#FBBC05" d="M10.4 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.5 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.3 0 11.6-2.1 15.5-5.7l-7.3-5.7c-2 1.4-4.7 2.3-8.2 2.3-6.3 0-11.7-3.7-13.6-9.1l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>使用 Google 继续</button>
+      <button class="soc-btn" data-soc="Apple"><svg class="ico" viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.8c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.6.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.4 0-2.8.8-3.5 2.1-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.5 2.2 2.6 2.2 1 0 1.4-.7 2.7-.7s1.6.7 2.7.7c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.3-.1 0-2.1-.8-2.1-3.5zM14.3 6.3c.6-.7 1-1.7.9-2.7-.9.1-1.9.6-2.5 1.3-.6.6-1 1.6-.9 2.6 1 .1 1.9-.5 2.5-1.2z"/></svg>使用 Apple 继续</button>
+    </div>
+    <p class="login-fine">继续即代表同意我们的 <a>服务条款</a> 与 <a>隐私政策</a>。<br>演示界面 · 暂未接入真实账户系统。</p>
+  </div>
+</div>
+
+<!-- ===== 玩法说明（首次抽牌前） ===== -->
+<div class="modal-bg" id="howBg">
+  <div class="modal" style="text-align:center">
+    <div class="mb-kicker cinzel" style="margin-bottom:4px">THE RITUAL · 抽牌仪式</div>
+    <h3 style="font-size:20px;color:var(--gold)">如何抽牌</h3>
+    <div class="how-steps">
+      <div class="how-step"><div class="how-num cinzel">1</div><div><b>静心提问</b><span>写下此刻最想问的事，深呼吸，让心安定下来。</span></div></div>
+      <div class="how-step"><div class="how-num cinzel">2</div><div><b>凭直觉浏览</b><span>七十八张牌已为你洗好、扣合成扇。不必思考，让目光自由滑过牌背。</span></div></div>
+      <div class="how-step"><div class="how-num cinzel">3</div><div><b>点选并揭示</b><span>点下心动的那几张，牌将为你翻开，塔罗师随即解读。</span></div></div>
+    </div>
+    <label class="how-check"><input type="checkbox" id="howSkip"> 我已了解，下次不再显示</label>
+    <div class="actions"><button class="save" id="howStart" style="flex:1">✦ 开始抽牌</button></div>
+  </div>
+</div>
+
+<!-- ===== 玩法进入页 ===== -->
+<div id="modeScreen">
+  <button class="ov-close" id="msClose">✕</button>
+  <div class="ms-wrap">
+    <div class="ms-kicker cinzel">在心中想着你的问题</div>
+    <h2 class="ms-title serif" id="msTitle">圣三角</h2>
+    <div class="ms-rule"></div>
+    <div class="ms-readers">
+      <button class="ms-arrow" id="msPrev" aria-label="上一位">‹</button>
+      <div class="ms-avatars" id="msAvatars"></div>
+      <button class="ms-arrow" id="msNext" aria-label="下一位">›</button>
+    </div>
+    <div class="ms-readername serif" id="msReaderName">—</div>
+    <div class="ms-readermeta" id="msReaderMeta"></div>
+    <div class="ms-ask">
+      <textarea id="msQuestion" maxlength="200" placeholder="写下你的问题…（也可以留空，凭直觉抽）"></textarea>
+      <div class="ms-count"><span id="msCount">0</span>/200</div>
+    </div>
+    <button class="ms-draw cinzel" id="msDraw">开 始 抽 牌</button>
+    <button class="ms-skip" id="msSkip">先不写问题，凭直觉直接抽 →</button>
+    <div class="ms-cost" id="msCost"></div>
+    <div class="ms-note" id="msNote"></div>
+    <div class="ms-friend">下不了手抽？<a id="msFriend">让朋友替我抽 →</a></div>
+  </div>
+</div>
+
+<!-- ===== 切换加载 / 过渡 ===== -->
+<div id="screenLoad">
+  <div class="sl-sigil"><i></i><i></i><span class="sl-star">✦</span></div>
+  <div class="sl-label cinzel" id="slLabel"></div>
+</div>
+
+<div class="fab"><button id="fabFb">💬 反馈</button></div>
+<footer>星语塔罗 · Stella Tarot ｜ 仅供娱乐与自我反思，不构成任何决策建议</footer>
+
+<script>
+/* =========================================================
+   星语塔罗 Stella Tarot —— 全部为原创实现
+   牌义为公有领域塔罗知识（原创中文表述）；音乐/动画/卡面均程序化生成。
+   ========================================================= */
+
+/* ---------- 1. 78 张塔罗牌 ---------- */
+const MAJ = [
+ ["愚者","The Fool","🃏","新的开始、纯真、冒险、自由","鲁莽、犹豫不前、逃避现实",1],
+ ["魔术师","The Magician","🎩","创造力、行动、显化、万事俱备","操纵、潜能未发挥、空有想法",1],
+ ["女祭司","The High Priestess","🌙","直觉、潜意识、神秘、内在智慧","忽视直觉、隐情、表里不一",0],
+ ["皇后","The Empress","👑","丰盛、滋养、感性、繁荣","依赖、创造受阻、过度保护",1],
+ ["皇帝","The Emperor","🏛️","权威、秩序、稳定、掌控","专制、僵化、失序",1],
+ ["教皇","The Hierophant","⛪","传统、信念、指引、规范","叛逆、打破常规、教条束缚",0],
+ ["恋人","The Lovers","💞","爱情、结合、重要的选择、契合","失衡、错误选择、价值分歧",1],
+ ["战车","The Chariot","🏇","意志、胜利、前进、掌控方向","失控、方向迷失、内在冲突",1],
+ ["力量","Strength","🦁","勇气、内在力量、耐心、温柔的坚定","自我怀疑、软弱、情绪失控",1],
+ ["隐士","The Hermit","🏮","内省、寻求真理、独处、指引","孤立、逃避、固执己见",0],
+ ["命运之轮","Wheel of Fortune","🎡","转机、命运流转、循环、好运","厄运、失控、抗拒变化",1],
+ ["正义","Justice","⚖️","公正、因果、责任、真相","不公、推诿、失衡",0],
+ ["倒吊人","The Hanged Man","🙃","换位思考、暂停、放下、牺牲","拖延、无谓牺牲、停滞不前",0],
+ ["死神","Death","💀","结束、转变、重生、放下旧的","抗拒改变、停滞、恐惧告别",-1],
+ ["节制","Temperance","🍶","平衡、调和、耐心、节制","失衡、极端、缺乏耐心",1],
+ ["恶魔","The Devil","😈","束缚、执念、欲望、物质诱惑","挣脱束缚、觉醒、戒除",-1],
+ ["高塔","The Tower","🗼","突变、崩塌、觉醒、释放","逃避灾难、内在动荡、迟来的瓦解",-1],
+ ["星星","The Star","⭐","希望、疗愈、灵感、信念","失望、信心动摇、迷失方向",1],
+ ["月亮","The Moon","🌕","幻象、潜意识、不安、隐藏的真相","释放恐惧、迷雾散去、真相浮现",-1],
+ ["太阳","The Sun","☀️","喜悦、成功、活力、光明","暂时的低落、过度乐观、迟来的成功",1],
+ ["审判","Judgement","📯","觉醒、重生、召唤、自我审视","自我怀疑、逃避、悔恨",1],
+ ["世界","The World","🌍","圆满、完成、整合、成就","未竟之事、停滞、缺少收尾",1],
+];
+const SUITS = [
+ ["权杖","Wands","🔥",["灵感、新机会、创造的火花","动力不足、计划受阻"],
+  [["规划、远见、抉择",0],["扩展、远见、等待回报",1],["庆祝、稳定、归属",1],["竞争、分歧、磨合",-1],
+   ["胜利、认可、凯旋",1],["坚守、防御、勇气",0],["快速进展、消息、行动",1],["坚持、警惕、韧性",0],["重担、责任、压力",-1]],
+  [["热情、探索、新点子",1],["冒险、热情、行动、魅力",1],["自信、独立、热情",1],["领导力、远见、魄力",1]]],
+ ["圣杯","Cups","💧",["新感情、爱、情感充盈","情感封闭、空虚、压抑"],
+  [["结合、爱情、互相吸引",1],["友谊、庆祝、团聚",1],["冷漠、错失、倦怠",-1],["失落、遗憾、专注于损失",-1],
+   ["怀旧、纯真、回忆",1],["幻想、选择、白日梦",-1],["离开、追寻更深的意义",0],["满足、愿望成真、丰盈",1],["圆满、家庭幸福、和谐",1]],
+  [["浪漫讯息、灵感、感性",1],["浪漫、追求、理想主义",1],["共情、温柔、直觉",1],["情感成熟、包容、平和",1]]],
+ ["宝剑","Swords","⚔️",["突破、清晰、真相、新想法","混乱、误解、思维受阻"],
+  [["两难、僵局、权衡",0],["心碎、悲伤、伤痛",-1],["休息、恢复、沉淀",0],["冲突、争胜、代价",-1],
+   ["过渡、离开、走向平静",1],["策略、隐瞒、独行",-1],["受限、自我设限、无助",-1],["焦虑、恐惧、忧虑",-1],["结束、谷底、痛苦的终结",-1]],
+  [["好奇、机敏、警觉",0],["果断、雄辩、行动迅速",1],["独立、理智、坦诚",0],["理性、权威、思辨",1]]],
+ ["星币","Pentacles","🪙",["新机会、财富、踏实的开端","错失机会、财务不稳"],
+  [["平衡、灵活、取舍",0],["协作、技艺、初步成果",1],["稳固、节俭、安全感",0],["困顿、匮乏、考验",-1],
+   ["慷慨、给予与接受、互助",1],["耐心、投资、长期回报",0],["勤勉、专注、精进技艺",1],["富足、独立、自我犒赏",1],["财富、家族、长久稳定",1]],
+  [["学习、机会、目标",1],["勤恳、可靠、稳扎稳打",1],["务实、滋养、丰盛",1],["富足、稳健、事业有成",1]]],
+];
+const RANKS = ["一","二","三","四","五","六","七","八","九","十","侍从","骑士","王后","国王"];
+const RANKS_EN = ["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"];
+function reverseOf(u){return "在此方面受阻或失衡："+u;}
+const DECK=[];
+MAJ.forEach(c=>DECK.push({n:c[0],e:c[1],s:c[2],u:c[3],r:c[4],p:c[5],major:true}));
+SUITS.forEach(([cn,en,sym,ace,mid,court])=>{
+  DECK.push({n:cn+"一",e:"Ace of "+en,s:sym,u:ace[0],r:ace[1],p:1});
+  mid.forEach((m,i)=>DECK.push({n:cn+RANKS[i+1],e:RANKS_EN[i+1]+" of "+en,s:sym,u:m[0],r:reverseOf(m[0]),p:m[1]}));
+  court.forEach((m,i)=>DECK.push({n:cn+RANKS[i+10],e:RANKS_EN[i+10]+" of "+en,s:sym,u:m[0],r:reverseOf(m[0]),p:m[1]}));
+});
+DECK.forEach((c,i)=>c.idx=i); // 牌序索引，对应 cards/<idx>.png（即梦生成的真实牌图）
+
+/* ---------- 2. 解读者 ---------- */
+const READERS = [
+ {id:"aude",name:"奥德",av:"⚙",desc:"齿轮钟匠 · 理性洞察",age:"30+ 岁 · 男",premium:false,voice:{pitch:0.8,rate:0.98},
+   blurb:"曾痴迷因果与必然的天文钟匠，倾尽一生想算准一场注定的灾祸。如今以最锋利的逻辑替你拆解牌局——开场先点破你在回避的核心。",
+   open:q=>`关于「${q}」——牌已摊开，我直接说我看到的。`,
+   close:"你早就知道答案了，我只是帮你把它说出口。下一步怎么走，你比谁都清楚。"},
+ {id:"lyra",name:"璃音",av:"🌙",desc:"守灯人 · 温柔疗愈",age:"24 岁 · 女",premium:false,voice:{pitch:1.3,rate:0.92},
+   blurb:"海岬灯塔的守灯人，一生为归航的船点灯，却没能等回所爱。她把那份温柔带进回廊——先接住你的情绪，再轻轻给你方向。",
+   open:q=>`深呼吸一下。关于「${q}」，让我陪你一张一张，慢慢看过去，好吗？`,
+   close:"别怕。无论牌说了什么，都请对自己温柔一点——你已经做得很好了。"},
+ {id:"xuanwei",name:"玄微",av:"☯",desc:"古卷之主 · 东方玄学",age:"年龄莫测",premium:true,voice:{pitch:0.7,rate:0.86},
+   blurb:"游历山河的古卜者，毕生续写一部未竟的《命书》。以传统牌理与气运推演，言简意深，每替一人解牌，便往书里添一页。",
+   open:q=>`占问：「${q}」。静心凝神，且看此局牌象所示气数。`,
+   close:"卦象已明。然天行有常，趋吉避凶在乎一心，望君善自斟酌。"},
+ {id:"sera",name:"赛拉",av:"🥀",desc:"荆棘占卜师 · 犀利直言",age:"26 岁 · 女",premium:true,voice:{pitch:1.12,rate:1.04},
+   blurb:"曾名动一时、因说真话被构陷陨落的占卜师。带着满身荆棘回到回廊，从此只说真相，不再讨好任何人——逃避很贵，你付得起吗？",
+   open:q=>`关于「${q}」，我不哄你。牌面摆在这儿，听不听是你的事。`,
+   close:"真相往往不舒服，但逃避更贵。想清楚，再动。"},
+ {id:"noah",name:"诺亚",av:"✦",desc:"星尘游吟者 · 诗意仪式",age:"23 岁 · 中性",premium:true,voice:{pitch:1.0,rate:0.95},
+   blurb:"四处流浪、为人唱命运之歌的游吟诗人，琴弦断尽于一场暴风雪。回廊收留了他——他把每次占卜写成一首诗，用意象与隐喻说真相。",
+   open:q=>`让我为「${q}」，弹一支命运的小调……牌啊，请你低语。`,
+   close:"我给你的是一首诗——但它仍然是真相。带着它走吧。"},
+];
+let currentReader = null; // 未选择塔罗师（需先在"叩响一扇门"里选定）
+
+/* ---------- 3. 牌阵 ---------- */
+const SPREADS = {
+ daily:   {name:"今日一牌",icon:"📅",n:1,pos:["今日指引"]},
+ triangle:{name:"圣三角",icon:"△",n:3,pos:["过去 · 根源","现在 · 核心","未来 · 走向"]},
+ love:    {name:"爱情占卜",icon:"💞",n:3,pos:["你的状态","对方的状态","关系的走向"]},
+ celtic:  {name:"凯尔特十字",icon:"✚",n:10,pos:["现状","眼前挑战","根基（远因）","近期过去","可能的未来","即将到来","你的心态","外部影响","希望与恐惧","最终结果"]},
+ yesno:   {name:"是与否",icon:"☯",n:1,pos:["核心指示"],yn:true},
+};
+let currentSpread = "triangle";
+
+/* ---------- 4. 导航 / 玩法 ---------- */
+const NAV=[
+ {t:"塔罗",dd:[["📅","今日一牌","daily"],["△","圣三角","triangle"],["✚","凯尔特十字","celtic"],["💞","爱情占卜","love"],["☯","是与否","yesno"]]},
+ {t:"雷诺曼",dd:[["🂠","单牌指引","daily"],["🃏","三牌连读","triangle"]]},
+ {t:"答案之书",dd:[["📖","随机一答","yesno"]]},
+ {t:"献愿",dd:[["🕯️","许个愿","daily"]]},
+];
+document.getElementById("nav").innerHTML=NAV.map(g=>`<div class="item">${g.t} ▾<div class="dd">${g.dd.map(d=>`<a data-spread="${d[2]}">${d[1]}</a>`).join("")}</div></div>`).join("");
+const CHIPS=[["△","圣三角","triangle",57],["💞","爱情占卜","love",36],["✚","凯尔特十字","celtic",28],["📅","今日一牌","daily",27],["☯","是与否","yesno",11]];
+document.getElementById("chips").innerHTML=CHIPS.map(c=>`<div class="chip" data-spread="${c[2]}">${c[1]}<small>♡ ${c[3]}人</small></div>`).join("");
+document.getElementById("quick").innerHTML=`<span data-spread="triangle" class="on">▸ 直接占</span><span data-spread="daily">今日一牌</span><span data-spread="yesno">YES / NO</span>`;
+document.getElementById("readerDd").innerHTML=READERS.map(r=>`<div class="r" data-reader="${r.id}"><div class="rav"><img src="assets/web/reader_${r.id}.webp" alt=""></div><div><b>${r.name}${r.premium?' <span style="color:var(--gold-dim);font-size:11px;border:1px solid var(--line);border-radius:8px;padding:0 5px">✦ 会员</span>':''}</b><span>${r.desc}</span></div></div>`).join("");
+
+/* ---------- 5. 交互 ---------- */
+function setSpread(key){currentSpread=key;document.querySelectorAll("[data-spread]").forEach(el=>el.classList.toggle("on",el.dataset.spread===key));}
+document.querySelectorAll("[data-spread]").forEach(el=>el.addEventListener("click",()=>{openModeScreen(el.dataset.spread);}));
+const readerSel=document.getElementById("readerSel");
+function updateReaderUI(){ document.getElementById("readerName").textContent=currentReader.name; document.getElementById("readerAv").innerHTML='<img src="assets/web/reader_'+currentReader.id+'.webp" alt="">'; }
+function toast(msg){ let t=document.querySelector('.toast'); if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);} t.textContent=msg; requestAnimationFrame(()=>t.classList.add('show')); clearTimeout(window.__toastT); window.__toastT=setTimeout(()=>t.classList.remove('show'),2800); }
+function renderReaderScreen(){
+  document.getElementById("rsGrid").innerHTML=READERS.map(r=>{
+    const cur=currentReader&&currentReader.id===r.id;
+    return `<div class="rs-card ${cur?'cur':''}">
+      <div class="rs-portrait" style="background-image:url('assets/web/reader_${r.id}.webp')">${r.premium?'<span class="rs-vip">✦ 会员</span>':''}</div>
+      <div class="rs-body">
+        <div class="rs-name serif">${r.name}</div>
+        <div class="rs-meta">${r.desc} · ${r.age}</div>
+        <div class="rs-blurb">${r.blurb}</div>
+        <button class="rs-btn ${cur?'cur':(r.premium?'vip':'free')}" data-pick="${r.id}">${cur?'已选定':(r.premium?'✦ 叩门 · 会员':'选择 TA')}</button>
+      </div></div>`;
+  }).join("");
+  document.querySelectorAll("[data-pick]").forEach(b=>b.addEventListener("click",()=>{
+    const r=READERS.find(x=>x.id===b.dataset.pick); if(!r){return;} if(currentReader&&currentReader.id===r.id){closeReaderScreen();return;}
+    currentReader=r; updateReaderUI();
+    if(r.premium) toast("会员塔罗师 · 演示版可直接体验（正式版需开通会员）");
+    try{ Voice.speak(r.name+'。'+r.blurb.split('。')[0]+'。', r.voice); }catch(e){}
+    closeReaderScreen();
+  }));
+}
+function openReaderScreen(){ renderReaderScreen(); document.getElementById("readerScreen").classList.add("open"); }
+function closeReaderScreen(){ document.getElementById("readerScreen").classList.remove("open"); }
+readerSel.addEventListener("click",e=>{e.stopPropagation();openReaderScreen();});
+document.getElementById("rsClose").addEventListener("click",closeReaderScreen);
+document.getElementById("send").addEventListener("click",()=>openModeScreen(currentSpread));
+document.getElementById("question").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))openModeScreen(currentSpread);});
+document.getElementById("again").addEventListener("click",()=>{document.getElementById("result").classList.remove("show");window.scrollTo({top:0,behavior:"smooth"});});
+
+/* ---------- 6. 抽牌 + 解读 ---------- */
+let busy=false;
+let fanCtx=null;
+async function doReading(){
+  if(busy)return;
+  if(!currentReader){ toast&&toast("先叩响一扇门，选一位塔罗师"); openReaderScreen(); return; }
+  if(!document.getElementById("intro")?.classList.contains("gone")) enterApp();
+  const q=document.getElementById("question").value.trim()||"我此刻最该关注什么？";
+  const spread=SPREADS[currentSpread];
+  const shuffled=[...DECK].sort(()=>Math.random()-0.5);
+  const draws=shuffled.slice(0,spread.n).map(card=>({card,rev:Math.random()<0.5}));
+  fanCtx={q,spread,draws}; maybeShowHow(showFan); return;
+}
+
+/* ---------- 6b. 扇形抽牌仪式：浏览牌堆 → 凭直觉点选 → 揭示 ---------- */
+function showFan(){ document.getElementById("drawFan").classList.add("open"); renderFan(); }
+function renderFan(){
+  const spread=fanCtx.spread, need=spread.n; let picked=0;
+  const big=document.getElementById("fanBig"), hint=document.getElementById("fanHint");
+  const setHead=()=>{ const left=need-picked; big.textContent=left>0?left:"✓";
+    hint.textContent = left>0 ? `${spread.icon} ${spread.name} · 还需选 ${left} 张` : "命运已定 · 正在揭示…"; };
+  setHead();
+  const mob=window.matchMedia("(max-width:680px)").matches;
+  const N=mob?17:21, SPAN=mob?40:50, arc=document.getElementById("fanArc"); let h="";
+  for(let i=0;i<N;i++){ const deg=((i-(N-1)/2)/((N-1)/2))*SPAN; const sd=(i/N*5.6).toFixed(2);
+    h+=`<div class="fcard" style="--deg:${deg}deg;--sheen-delay:-${sd}s"></div>`; }
+  arc.innerHTML=h;
+  arc.querySelectorAll(".fcard").forEach(el=>el.addEventListener("click",function(){
+    if(this.classList.contains("chosen")||picked>=need)return;
+    picked++; this.classList.add("chosen"); this.innerHTML=`<span class="fnum">${picked}</span>`; try{Music.ping();}catch(e){}
+    setHead();
+    if(picked>=need){ setTimeout(()=>{ document.getElementById("drawFan").classList.remove("open"); revealAndRead(fanCtx.q,fanCtx.spread,fanCtx.draws); }, 750); }
+  }));
+}
+function fanReshuffle(){ if(!fanCtx)return; const sh=[...DECK].sort(()=>Math.random()-0.5); fanCtx.draws=sh.slice(0,fanCtx.spread.n).map(card=>({card,rev:Math.random()<0.5})); renderFan(); }
+document.getElementById("fanReshuffle")?.addEventListener("click",fanReshuffle);
+document.getElementById("fanClose")?.addEventListener("click",()=>{document.getElementById("drawFan").classList.remove("open");});
+
+async function revealAndRead(q,spread,draws){
+  busy=true;document.getElementById("send").disabled=true;
+  spendCoin();
+
+  document.getElementById("spreadName").textContent=`${spread.icon} ${spread.name}`;
+  document.getElementById("qEcho").textContent=`“${q}”`;
+  document.getElementById("verdictBox").innerHTML="";
+  document.getElementById("readingBox").innerHTML="";
+  const cardsEl=document.getElementById("cards");
+  cardsEl.className="cards"+(currentSpread==="celtic"?" celtic":"");
+  cardsEl.innerHTML=draws.map((d,i)=>`
+    <div class="cardbox" style="animation-delay:${i*0.09}s">
+      <div class="tilt" id="tilt${i}">
+        <div class="card" id="card${i}">
+          <div class="face back"></div>
+          <div class="face front ${d.rev?'rev':''}">
+            <img class="art" src="cards/${d.card.idx}.webp" alt="" loading="lazy" onload="this.closest('.front').classList.add('hasart')" onerror="this.remove()" />
+            <div class="frame"></div><div class="holo"></div><div class="glow"></div>
+            <div class="sym">${d.card.s}</div>
+            <div class="cn">${d.card.n}</div>
+            <div class="en">${d.card.e}</div>
+            <div class="ori ${d.rev?'r':''}">${d.rev?'逆位':'正位'}</div>
+          </div>
+        </div>
+      </div>
+      <div class="pos-label">${spread.pos[i]||""}</div>
+    </div>`).join("");
+  draws.forEach((d,i)=>attachTilt(document.getElementById("tilt"+i)));
+  const result=document.getElementById("result");
+  result.classList.add("show");
+  result.scrollIntoView({behavior:"smooth",block:"start"});
+
+  for(let i=0;i<draws.length;i++){
+    await wait(240);
+    document.getElementById("card"+i).classList.add("flip");
+    Music.ping(); sparkle(document.getElementById("card"+i).parentElement);
+  }
+  await wait(650);
+
+  if(spread.yn){
+    const d=draws[0];const eff=d.rev?-d.card.p:d.card.p;
+    const v=eff>0?["yes","是"]:eff<0?["no","否"]:["maybe","可能"];
+    document.getElementById("verdictBox").innerHTML=`<div class="verdict ${v[0]} serif">${v[1]}</div>`;
+  }
+
+  const box=document.getElementById("readingBox");
+  box.innerHTML=`<div class="reading"><div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 正在凝视牌面<span class="dots"></span></div></div>`;
+  try{ Voice.speak(currentReader.open(q), currentReader.voice); }catch(e){}  // 塔罗师开口
+  const panel=box.querySelector(".reading");
+
+  let usedAI=false;
+  if(aiReady || (aiCfg.use && aiCfg.key)){
+    try{
+      await streamAI(q,spread,draws,(full)=>{
+        panel.innerHTML=`<div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 的解读</div>`+
+          formatStream(full)+`<span class="cursor"></span>`;
+        box.scrollIntoView({behavior:"smooth",block:"nearest"});
+      });
+      panel.querySelector(".cursor")?.remove();
+      usedAI=true;
+    }catch(err){
+      panel.innerHTML=`<div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 的解读</div>
+        <p class="warn">（AI 接口暂时不可用：${err.message}，已切换为内置解读）</p>`+localReading(q,spread,draws);
+    }
+  }else{
+    await wait(450);
+    panel.innerHTML=`<div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 的解读</div>`+localReading(q,spread,draws);
+  }
+  if(!box.querySelector('.reading-disclaimer')){ box.insertAdjacentHTML('beforeend','<p class="reading-disclaimer">✦ 塔罗解读仅供娱乐与自我探索 · 不构成医疗、法律、财务或心理等专业建议，请把决定权留给你自己。</p>'); }
+  busy=false;document.getElementById("send").disabled=false;
+}
+
+/* ---------- 7. 内置解读（兜底） ---------- */
+const LINK=["这提醒你","在这里，","牌面显示","可以理解为","值得注意的是","它暗示","这一张落在此处，意味着"];
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function localReading(q,spread,draws){
+  const P=[];P.push(`<p>${currentReader.open(q)}</p>`);
+  let pos=0,neg=0;
+  draws.forEach((d,i)=>{
+    const mean=d.rev?d.card.r:d.card.u;const eff=d.rev?-d.card.p:d.card.p;eff>0?pos++:eff<0?neg++:0;
+    P.push(`<p><span class="pos">【${spread.pos[i]||"指引"}】${d.card.n}（${d.rev?'逆位':'正位'}）</span><br><span class="mean">${pick(LINK)}${mean}。</span></p>`);
+  });
+  P.push("<hr>");
+  let tone;
+  if(pos>neg)tone="整体牌面能量<b style='color:#7ad99a'>偏积极</b>——顺势而为，机会大于阻力。";
+  else if(neg>pos)tone="整体牌面提示<b style='color:#e0a0a0'>需要谨慎</b>——眼下有阻力或情绪干扰，先稳住再说。";
+  else tone="整体牌面<b style='color:var(--gold)'>吉凶参半</b>——结果取决于你接下来的选择和心态。";
+  P.push(`<p>${tone}</p>`);
+  const first=draws[0],last=draws[draws.length-1];
+  P.push(`<p class="advice serif">✦ 一句话建议：朝着「${last.card.u.split('、')[0]}」的方向靠近，留意别陷入「${(first.rev?first.card.r:first.card.u).split('、').pop()}」的状态。</p>`);
+  P.push(`<p>${currentReader.close}</p>`);
+  return P.join("");
+}
+
+/* ---------- 8. DeepSeek 流式解读 ---------- */
+let aiReady=false;
+let aiCfg=JSON.parse(localStorage.getItem("stella_ai")||'{"use":false,"base":"https://api.deepseek.com","model":"deepseek-chat","key":""}');
+const IS_NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+if(window.__DS_KEY__&&!aiCfg.key){ aiCfg={use:true,base:"https://api.deepseek.com",model:"deepseek-chat",key:window.__DS_KEY__}; } // 原生App内置Key
+function buildMessages(q,spread,draws){
+  const cards=draws.map((d,i)=>`${spread.pos[i]||("位置"+(i+1))}：${d.card.n}（${d.rev?'逆位':'正位'}，牌义：${d.rev?d.card.r:d.card.u}）`).join("\n");
+  return [
+    {role:"system",content:`你是「星语塔罗」的占卜师【${currentReader.name}】，气质：${currentReader.desc}。请用温暖、贴近人心的简体中文，为眼前这位来访者解读这次塔罗牌阵。务必遵守：
+1. 开头先用一两句话温柔地回应并复述 TA 的问题，让 TA 感到被听见、被接住；若问题里透着情绪（失恋、迷茫、焦虑、自我怀疑等），先共情，再解牌。
+2. 始终紧扣 TA 真正问的那件事和那个领域来解，绝不套用与问题无关的模板（问感情就别扯事业）。
+3. 逐张解读：每张牌单独成段，段首用「【位置名 · 牌名（正位/逆位）】」点题，再说明这张牌在这个位置、对 TA 这个问题意味着什么。
+4. 之后用一段给出整体走向与最核心的那个洞察。
+5. 最后给一句具体、温柔、可立刻去做的小建议。
+6. 语气是启发与陪伴：多用「也许」「不妨」「可以试着」这样的引导式表达，避免武断的命令、吓人的断言或宿命论。
+7. 约 350-450 字，自然分段；除了段首的【】，不要使用任何 markdown 标题、井号或星号。
+8. 全程以【${currentReader.name}】的独特气质（${currentReader.desc}）说话。`},
+    {role:"user",content:`我的问题：${q}\n牌阵：${spread.name}\n抽到的牌：\n${cards}`}
+  ];
+}
+async function streamAI(q,spread,draws,onToken){
+  const messages=buildMessages(q,spread,draws);
+  if(IS_NATIVE && aiCfg.key){ // 原生 App：非流式直连（CapacitorHttp 绕过跨域），拿全文后逐字显示
+    const r=await fetch(aiCfg.base.replace(/\/+$/,"")+"/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+aiCfg.key},body:JSON.stringify({model:aiCfg.model,messages,temperature:0.85,stream:false})});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j=await r.json(); const full=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||"";
+    if(!full) throw new Error("空响应");
+    for(let i=1;i<=full.length;i+=2){ onToken(full.slice(0,i)); await new Promise(s=>setTimeout(s,12)); }
+    onToken(full); return full;
+  }
+  let res;
+  if(aiReady){ // 走本地后端（推荐）
+    res=await fetch("/api/reading",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages,temperature:0.85})});
+  }else{ // 浏览器直连（备用，可能跨域失败）
+    res=await fetch(aiCfg.base.replace(/\/+$/,"")+"/chat/completions",{method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+aiCfg.key},
+      body:JSON.stringify({model:aiCfg.model,messages,temperature:0.85,stream:true})});
+  }
+  if(!res.ok){let t="";try{t=(await res.json()).error||"";}catch(e){t=await res.text();}throw new Error("服务返回 "+res.status+(t?(" · "+String(t).slice(0,80)):""));}
+  const reader=res.body.getReader();const dec=new TextDecoder();let buf="",full="";
+  while(true){
+    const {done,value}=await reader.read();if(done)break;
+    buf+=dec.decode(value,{stream:true});
+    let idx;
+    while((idx=buf.indexOf("\n"))>=0){
+      const line=buf.slice(0,idx).trim();buf=buf.slice(idx+1);
+      if(!line.startsWith("data:"))continue;
+      const data=line.slice(5).trim();if(data==="[DONE]")continue;
+      try{const j=JSON.parse(data);const t=j.choices?.[0]?.delta?.content||"";if(t){full+=t;onToken(full);}}catch(e){}
+    }
+  }
+  if(!full)throw new Error("空响应");
+  return full;
+}
+function formatStream(text){return text.split(/\n+/).filter(s=>s.trim()).map(s=>{s=s.replace(/[*#`]/g,"");s=s.replace(/^【([^】]+)】/,'<span class="rlead">【$1】</span> ');return `<p>${s}</p>`;}).join("");}
+
+/* ---------- 9. 全息倾斜 + 粒子 ---------- */
+function attachTilt(wrap){
+  if(!wrap)return;const card=wrap.querySelector(".card");
+  wrap.addEventListener("mousemove",e=>{
+    const r=wrap.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-0.5,py=(e.clientY-r.top)/r.height-0.5;
+    wrap.style.transform=`rotateY(${px*16}deg) rotateX(${-py*16}deg)`;
+    const f=card.querySelector(".front");if(f){f.style.setProperty("--mx",(px*100+50)+"%");f.style.setProperty("--my",(py*100+50)+"%");}
+  });
+  wrap.addEventListener("mouseleave",()=>{wrap.style.transform="rotateY(0) rotateX(0)";});
+}
+function sparkle(box){
+  if(!box)return;
+  for(let i=0;i<12;i++){const s=document.createElement("div");s.className="spark";
+    const a=Math.random()*6.283,d=34+Math.random()*46;
+    s.style.setProperty("--tx",Math.cos(a)*d+"px");s.style.setProperty("--ty",Math.sin(a)*d+"px");
+    s.style.left="50%";s.style.top="42%";box.appendChild(s);setTimeout(()=>s.remove(),900);}
+}
+
+/* ---------- 10. 生成式氛围音乐（Web Audio · 暗黑电影：悬疑·凝重·命运·荒芜） ---------- */
+const Music=(function(){
+  let ctx=null,master=null,reverb=null,on=false,timers=[],chordIdx=0,stopPad=null;
+  // 低音域小调和声（大提琴/低音提琴音区），凝重与宿命
+  const chords=[
+    [55.00,82.41,110.00,164.81],   // Am 空五度
+    [49.00,73.42,98.00,146.83],    // G 下沉
+    [58.27,87.31,116.54,174.61],   // Bb 半音上行 → 悬疑
+    [43.65,65.41,87.31,130.81],    // F 更荒芜
+  ];
+  const tollNotes=[55.00,73.42,82.41,98.00]; // 命运钟声基频（深沉）
+  function init(){
+    if(ctx)return;
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    master=ctx.createGain();master.gain.value=0;
+    const comp=ctx.createDynamicsCompressor();master.connect(comp);comp.connect(ctx.destination);
+    reverb=makeReverb(4.2);const wet=ctx.createGain();wet.gain.value=0.7;reverb.connect(wet);wet.connect(master);
+    startWind();
+  }
+  function makeReverb(sec){
+    const len=Math.floor(ctx.sampleRate*sec);const buf=ctx.createBuffer(2,len,ctx.sampleRate);
+    for(let ch=0;ch<2;ch++){const d=buf.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2);}
+    const c=ctx.createConvolver();c.buffer=buf;return c;
+  }
+  function startWind(){ // 荒芜的风：褐噪声过缓慢带通
+    const len=ctx.sampleRate*4;const buf=ctx.createBuffer(1,len,ctx.sampleRate);const d=buf.getChannelData(0);
+    let last=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;last=(last+0.02*w)/1.02;d[i]=last*3.5;}
+    const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    const bp=ctx.createBiquadFilter();bp.type="bandpass";bp.frequency.value=320;bp.Q.value=0.7;
+    const wg=ctx.createGain();wg.gain.value=0.06;
+    const lfo=ctx.createOscillator();lfo.frequency.value=0.07;const lg=ctx.createGain();lg.gain.value=180;
+    lfo.connect(lg);lg.connect(bp.frequency);lfo.start();
+    src.connect(bp);bp.connect(wg);wg.connect(master);wg.connect(reverb);src.start();
+  }
+  function playPad(freqs){ // 缓慢呼吸的低音弦垫
+    const g=ctx.createGain();g.gain.value=0;
+    const lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=520;lp.Q.value=0.6;
+    g.connect(lp);lp.connect(master);lp.connect(reverb);
+    const oscs=freqs.map((f,i)=>{const o=ctx.createOscillator();o.type=i<2?"sine":"triangle";o.frequency.value=f;o.detune.value=Math.random()*8-4;const og=ctx.createGain();og.gain.value=i===0?0.5:0.26;o.connect(og);og.connect(g);o.start();return o;});
+    g.gain.linearRampToValueAtTime(0.13,ctx.currentTime+6);
+    return ()=>{try{g.gain.cancelScheduledValues(ctx.currentTime);g.gain.setValueAtTime(g.gain.value,ctx.currentTime);g.gain.linearRampToValueAtTime(0,ctx.currentTime+6);oscs.forEach(o=>o.stop(ctx.currentTime+6.5));}catch(e){}};
+  }
+  function nextChord(){if(!on)return;if(stopPad)stopPad();stopPad=playPad(chords[chordIdx%chords.length]);chordIdx++;timers.push(setTimeout(nextChord,13000));}
+  function toll(){ // 命运钟声：非谐泛音、长衰减、稀疏
+    if(!on)return;
+    const base=tollNotes[Math.floor(Math.random()*tollNotes.length)];
+    const partials=[1,2.76,5.40,8.93],decays=[5,3.4,2.2,1.6];
+    const p=ctx.createStereoPanner();p.pan.value=Math.random()*0.8-0.4;p.connect(master);p.connect(reverb);
+    partials.forEach((mult,i)=>{const o=ctx.createOscillator();o.type="sine";o.frequency.value=base*mult;const g=ctx.createGain();g.gain.value=0;o.connect(g);g.connect(p);
+      g.gain.linearRampToValueAtTime(0.16/(i+1),ctx.currentTime+0.01);g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+decays[i]);
+      o.start();o.stop(ctx.currentTime+decays[i]+0.1);});
+    timers.push(setTimeout(toll,14000+Math.random()*16000));
+  }
+  function whisper(){ // 命运的低语：极轻的无字女声式音垫
+    if(!on)return;
+    const note=[330,392,440,494][Math.floor(Math.random()*4)];
+    const o=ctx.createOscillator(),o2=ctx.createOscillator(),g=ctx.createGain(),bp=ctx.createBiquadFilter();
+    o.type="sawtooth";o.frequency.value=note;o2.type="sawtooth";o2.frequency.value=note*1.005;
+    bp.type="bandpass";bp.frequency.value=900;bp.Q.value=4;
+    const vib=ctx.createOscillator();vib.frequency.value=5;const vg=ctx.createGain();vg.gain.value=3;vib.connect(vg);vg.connect(o.frequency);vg.connect(o2.frequency);vib.start();
+    o.connect(bp);o2.connect(bp);bp.connect(g);g.connect(reverb);g.connect(master);
+    g.gain.value=0;g.gain.linearRampToValueAtTime(0.05,ctx.currentTime+3);g.gain.linearRampToValueAtTime(0,ctx.currentTime+8);
+    o.start();o2.start();vib.stop(ctx.currentTime+8.2);o.stop(ctx.currentTime+8.2);o2.stop(ctx.currentTime+8.2);
+    timers.push(setTimeout(whisper,22000+Math.random()*25000));
+  }
+  return {
+    start(){try{init();if(ctx.state==="suspended")ctx.resume();on=true;master.gain.cancelScheduledValues(ctx.currentTime);master.gain.linearRampToValueAtTime(0.16,ctx.currentTime+5);nextChord();timers.push(setTimeout(toll,4000));timers.push(setTimeout(whisper,12000));}catch(e){}},
+    stop(){on=false;try{master.gain.linearRampToValueAtTime(0,ctx.currentTime+2);}catch(e){}timers.forEach(clearTimeout);timers=[];if(stopPad){stopPad();stopPad=null;}},
+    ping(){if(!ctx||!on)return;try{const base=146.83,partials=[1,2.76,5.4];const p=ctx.createStereoPanner();p.connect(master);p.connect(reverb);partials.forEach((m,i)=>{const o=ctx.createOscillator();o.type="sine";o.frequency.value=base*m;const g=ctx.createGain();g.gain.value=0;o.connect(g);g.connect(p);g.gain.linearRampToValueAtTime(0.12/(i+1),ctx.currentTime+0.01);g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+2.2);o.start();o.stop(ctx.currentTime+2.3);});}catch(e){}},
+    get on(){return on;}
+  };
+})();
+
+/* ---------- 10b. 塔罗师配音（浏览器语音合成；二期可换云端TTS） ---------- */
+const Voice=(function(){
+  let voices=[];
+  function load(){ try{ voices=speechSynthesis.getVoices(); }catch(e){} }
+  if('speechSynthesis' in window){ load(); try{ speechSynthesis.onvoiceschanged=load; }catch(e){} }
+  function pickZh(){ return voices.find(v=>/zh|chinese|huihui|yaoyao|xiaoxiao|kangkang|mandarin/i.test((v.lang||'')+(v.name||''))) || voices[0]; }
+  return {
+    speak(text,vp){ return; /* 浏览器合成音质差，已关闭；待接入火山云端 TTS 再启用 */ },
+    stop(){ try{ speechSynthesis.cancel(); }catch(e){} }
+  };
+})();
+
+/* ---------- 11. 开场动画 ---------- */
+(function intro(){
+  const intro=document.getElementById("intro");
+  if(!intro) return;
+  if(sessionStorage.getItem("stella_entered")){intro.classList.add("gone");setTimeout(()=>intro.remove(),50);return;}
+  setTimeout(()=>document.getElementById("introCta")?.classList.add("show"),1500);
+  window.__introStop=()=>{};
+})();
+function enterApp(){
+  const intro=document.getElementById("intro");
+  if(!intro||intro.classList.contains("gone"))return;
+  intro.classList.add("gone");sessionStorage.setItem("stella_entered","1");
+  if(window.__introStop)window.__introStop();
+  setTimeout(()=>intro.remove(),1000);
+  // 取消主界面视频静音 → 播放即梦自带的音效/配音（需用户手势，进入这一下即是手势）
+  const hv=document.getElementById('heroVid'); if(hv&&soundOn){ hv.muted=false; if(hv.play) hv.play().catch(()=>{}); }
+}
+document.getElementById("enterBtn")?.addEventListener("click",enterApp);
+document.getElementById("skipIntro")?.addEventListener("click",enterApp);
+// 开场：轻触画面开启声音（绕过自动播放静音限制；点“推门进入/跳过”仍直接进入）
+let introSoundOn=false;
+function enableIntroSound(){
+  if(introSoundOn)return; introSoundOn=true;
+  const iv=document.getElementById('introVid');
+  if(iv){ iv.muted=false; try{iv.volume=0.85;}catch(e){} if(iv.play)iv.play().catch(()=>{}); }
+  document.getElementById('introSoundHint')?.classList.add('gone');
+}
+document.getElementById('intro')?.addEventListener('click',e=>{
+  if(e.target.closest('#enterBtn,#skipIntro'))return;
+  enableIntroSound();
+});
+setTimeout(()=>document.getElementById('introSoundHint')?.classList.add('show'),1900);
+
+/* ---------- 12. 设置弹窗 ---------- */
+const modalBg=document.getElementById("modalBg");
+function refreshStatus(){
+  const s=document.getElementById("aiStatus");
+  if(aiReady){s.className="status ok";s.innerHTML="● 已通过本地服务连接 DeepSeek，解读由真实 AI 流式生成";}
+  else if(aiCfg.use&&aiCfg.key){s.className="status ok";s.innerHTML="● 已配置浏览器直连 Key（备用模式）";}
+  else{s.className="status off";s.innerHTML="○ 未连接 AI，当前使用内置解读。建议用 启动.bat 运行";}
+}
+document.getElementById("settings").addEventListener("click",()=>{
+  document.getElementById("baseUrl").value=aiCfg.base;document.getElementById("model").value=aiCfg.model;document.getElementById("apiKey").value=aiCfg.key;
+  refreshStatus();modalBg.classList.add("open");});
+document.getElementById("cancelSet").addEventListener("click",()=>modalBg.classList.remove("open"));
+document.getElementById("saveSet").addEventListener("click",()=>{
+  aiCfg={use:!!document.getElementById("apiKey").value.trim(),base:document.getElementById("baseUrl").value.trim()||"https://api.deepseek.com",model:document.getElementById("model").value.trim()||"deepseek-chat",key:document.getElementById("apiKey").value.trim()};
+  localStorage.setItem("stella_ai",JSON.stringify(aiCfg));modalBg.classList.remove("open");});
+
+/* ---------- 13. 主题 / 音乐按钮 / 星币 ---------- */
+const themeBtn=document.getElementById("theme");
+function applyTheme(t){document.documentElement.dataset.theme=t==="light"?"light":"";themeBtn.textContent=t==="light"?"☀":"🌙";localStorage.setItem("stella_theme",t);}
+applyTheme(localStorage.getItem("stella_theme")||"dark");
+themeBtn.addEventListener("click",()=>applyTheme(document.documentElement.dataset.theme==="light"?"dark":"light"));
+
+let soundOn=localStorage.getItem("stella_sound")!=="off";
+const soundBtn=document.getElementById("sound");
+function refreshSound(){soundBtn.textContent=soundOn?"🔊":"🔇";soundBtn.classList.toggle("live",soundOn&&Music.on);}
+refreshSound();
+soundBtn.addEventListener("click",()=>{soundOn=!soundOn;localStorage.setItem("stella_sound",soundOn?"on":"off");const hv=document.getElementById('heroVid');if(hv){hv.muted=!soundOn;if(soundOn&&hv.play)hv.play().catch(()=>{});}Music.stop();refreshSound();});
+setInterval(refreshSound,1500);
+
+let coins=parseInt(localStorage.getItem("stella_coins")||"88");
+document.getElementById("coinNum").textContent=coins;
+function spendCoin(){if(coins>0){coins--;localStorage.setItem("stella_coins",coins);document.getElementById("coinNum").textContent=coins;}}
+document.getElementById("coins").addEventListener("click",()=>{coins+=20;localStorage.setItem("stella_coins",coins);document.getElementById("coinNum").textContent=coins;});
+document.getElementById("fabFb").addEventListener("click",()=>alert("感谢你的反馈！🌙"));
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ---------- 14. 背景星空 ---------- */
+(function(){let h="";for(let i=0;i<110;i++){const s=Math.random()*2+1;h+=`<div class="star" style="left:${Math.random()*100}%;top:${Math.random()*100}%;width:${s}px;height:${s}px;animation-delay:${Math.random()*4}s"></div>`;}document.getElementById("stars").innerHTML=h;})();
+
+/* ---------- 15. 启动时检测后端 AI ---------- */
+fetch("/api/health").then(r=>r.json()).then(j=>{
+  aiReady=!!(j&&j.ok&&j.hasKey);
+}).catch(()=>{aiReady=false;});
+
+/* ---------- 16. PWA Service Worker ---------- */
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+document.getElementById('heroVid')?.addEventListener('loadeddata',function(){ this.classList.add('ready'); });
+
+/* ---------- 16b. 玩法进入页 + 切换过渡 ---------- */
+const MODE_NOTE={
+  daily:"今日一牌每天只抽一次 · 同一天无论问什么，抽到的都是同一张牌，作为今日的指引。",
+  triangle:"圣三角：从「过去·根源 / 现在·核心 / 未来·走向」三个维度，看清一件事的来龙去脉。",
+  love:"爱情占卜：分别照见「你的状态 / 对方的状态 / 关系走向」，适合感情中的困惑。",
+  celtic:"凯尔特十字：十张牌全面铺开，剖析现状、阻碍、内心与最终结果，适合重大抉择。",
+  yesno:"是与否：心中默念一个可用「是 / 否」回答的问题，让牌给你一个明确的指向。"
+};
+let msReaderIdx=Math.max(0,READERS.findIndex(r=>r.id==='lyra')); // 默认温柔疗愈型，给脆弱来访者安全感
+function renderMsReaders(){
+  const box=document.getElementById('msAvatars'); if(!box)return;
+  box.innerHTML=READERS.map((r,i)=>`<div class="ms-av ${i===msReaderIdx?'sel':''}" data-ri="${i}"><img src="assets/web/reader_${r.id}.webp" alt=""></div>`).join('');
+  const r=READERS[msReaderIdx];
+  document.getElementById('msReaderName').textContent=r.name;
+  document.getElementById('msReaderMeta').innerHTML=`${r.desc} · ${r.age}${r.premium?' · <span style="color:var(--gold-dim)">✦ 会员</span>':''}`;
+  box.querySelectorAll('[data-ri]').forEach(el=>el.addEventListener('click',()=>{ msReaderIdx=+el.dataset.ri; renderMsReaders(); try{Music.ping&&Music.ping();}catch(e){} }));
+}
+function moveMsReader(d){ msReaderIdx=(msReaderIdx+d+READERS.length)%READERS.length; renderMsReaders(); }
+function openModeScreen(key){
+  if(!SPREADS[key]) key='triangle'; setSpread(key);
+  const sp=SPREADS[key];
+  document.getElementById('msTitle').textContent=sp.name;
+  document.getElementById('msNote').innerHTML=`<span class="i">✦</span><span>${MODE_NOTE[key]||''}</span>`;
+  const mainQ=(document.getElementById('question').value||'').trim();
+  const msQ=document.getElementById('msQuestion'); msQ.value=mainQ; document.getElementById('msCount').textContent=mainQ.length;
+  if(currentReader){ const idx=READERS.findIndex(r=>r.id===currentReader.id); if(idx>=0) msReaderIdx=idx; }
+  renderMsReaders();
+  document.getElementById('msCost').innerHTML=`本次免费体验 · 消耗 <b>20</b> 星币（每日登录自动赠送，<b>不花真钱</b>）· 当前余额 ${coins}`;
+  document.getElementById('msSkip').style.display=(sp.n===1)?'inline-block':'none';
+  if(!document.getElementById("intro")?.classList.contains("gone")) enterApp();
+  showLoading(sp.name, ()=>document.getElementById('modeScreen').classList.add('open'));
+}
+function startReadingFromMode(useQ){
+  const r=READERS[msReaderIdx]; currentReader=r; updateReaderUI();
+  if(r.premium) toast('会员塔罗师 · 演示版可直接体验');
+  const q=useQ?(document.getElementById('msQuestion').value||'').trim():'';
+  document.getElementById('question').value=q;
+  document.getElementById('modeScreen').classList.remove('open');
+  showLoading('正在洗牌…', ()=>doReading());
+}
+function showLoading(label, then){
+  const sl=document.getElementById('screenLoad'); if(!sl){ if(then)then(); return; }
+  document.getElementById('slLabel').textContent=label||'';
+  sl.classList.add('show');
+  setTimeout(()=>{ sl.classList.remove('show'); if(then)then(); }, 520);
+}
+document.getElementById('msPrev')?.addEventListener('click',()=>moveMsReader(-1));
+document.getElementById('msNext')?.addEventListener('click',()=>moveMsReader(1));
+document.getElementById('msDraw')?.addEventListener('click',()=>startReadingFromMode(true));
+document.getElementById('msSkip')?.addEventListener('click',()=>startReadingFromMode(false));
+document.getElementById('msClose')?.addEventListener('click',()=>document.getElementById('modeScreen').classList.remove('open'));
+document.getElementById('msQuestion')?.addEventListener('input',function(){document.getElementById('msCount').textContent=this.value.length;});
+document.getElementById('msFriend')?.addEventListener('click',()=>toast('「让朋友替我抽」即将开放 · 届时可分享链接，由好友凭直觉替你抽牌'));
+
+/* ---------- 17. 会员 / 订阅页 ---------- */
+const PLANS=[
+  {id:'free',name:'访客',price:{month:'¥0',year:'¥0'},note:'永久免费',btn:'当前方案',cls:'cur',
+   feats:['每日登录赠送星币 · 够日常占卜','全部基础牌阵：圣三角 / 是与否 / 今日一牌','内置贤者解读','三位免费塔罗师'],
+   off:['AI 深度流式解读','会员专属塔罗师','专属牌背与星语语音']},
+  {id:'seer',name:'星探',price:{month:'¥28',year:'¥228'},note:'进阶之选',feat:true,btn:'开通星探',cls:'go',badge:'最受欢迎',
+   feats:['每日双倍星币 · 占卜管够','AI 深度流式解读（更细更准）','解锁全部牌阵（含凯尔特十字）','解锁会员塔罗师','去除一切广告'],
+   off:['专属牌背与星语语音']},
+  {id:'master',name:'大师',price:{month:'¥68',year:'¥588'},note:'尊享全部',btn:'成为大师',cls:'ghost',
+   feats:['无限占卜 · 无限星币','全部五位塔罗师','专属电影级牌背与星语语音','优先生成 · 更快出图出片','命运日志云端同步']}
+];
+let mbCycle='month';
+function renderPlans(){
+  const box=document.getElementById('plans'); if(!box)return;
+  box.innerHTML=PLANS.map(p=>{
+    const price=p.price[mbCycle];
+    const per=p.id==='free'?'':(mbCycle==='month'?'<small> / 月</small>':'<small> / 年</small>');
+    const feats=p.feats.map(f=>`<li>${f}</li>`).join('')+(p.off?p.off.map(f=>`<li class="off">${f}</li>`).join(''):'');
+    return `<div class="plan ${p.feat?'feat':''}">${p.badge?`<div class="plan-badge">${p.badge}</div>`:''}
+      <div class="plan-name cinzel">星语 · ${p.name}</div>
+      <div class="plan-price">${price}${per}</div>
+      <div class="plan-note">${p.note}</div>
+      <ul>${feats}</ul>
+      <button class="plan-btn ${p.cls}" data-plan="${p.id}">${p.btn}</button></div>`;
+  }).join('');
+}
+renderPlans();
+document.getElementById('mbToggle')?.addEventListener('click',e=>{const b=e.target.closest('button[data-cycle]');if(!b)return;mbCycle=b.dataset.cycle;document.querySelectorAll('#mbToggle button').forEach(x=>x.classList.toggle('on',x===b));renderPlans();});
+document.getElementById('plans')?.addEventListener('click',e=>{const b=e.target.closest('button[data-plan]');if(!b)return;if(b.dataset.plan==='free'){toast('你正在使用免费方案');return;}toast('演示界面 · 支付将在正式版开放');});
+function openMember(){renderPlans();document.getElementById('memberScreen').classList.add('open');}
+document.getElementById('goVip')?.addEventListener('click',openMember);
+document.getElementById('mbClose')?.addEventListener('click',()=>document.getElementById('memberScreen').classList.remove('open'));
+
+/* ---------- 18. 登录页（界面外壳） ---------- */
+function openLogin(){document.getElementById('loginScreen').classList.add('open');}
+document.getElementById('goLogin')?.addEventListener('click',openLogin);
+document.getElementById('lgClose')?.addEventListener('click',()=>document.getElementById('loginScreen').classList.remove('open'));
+document.getElementById('lgSend')?.addEventListener('click',()=>{const v=(document.getElementById('lgEmail').value||'').trim();toast(v?'演示界面 · 正式版将向你的邮箱发送登录链接':'请先填写邮箱');});
+document.querySelectorAll('.soc-btn').forEach(b=>b.addEventListener('click',()=>toast('演示界面 · '+b.dataset.soc+' 登录将在正式版开放')));
+
+/* ---------- 19. 玩法说明：首次抽牌前的仪式说明 ---------- */
+let pendingHow=null;
+function maybeShowHow(then){
+  if(localStorage.getItem('stella_how')==='1'){ then(); return; }
+  pendingHow=then; document.getElementById('howBg').classList.add('open');
+}
+document.getElementById('howStart')?.addEventListener('click',()=>{
+  if(document.getElementById('howSkip').checked) localStorage.setItem('stella_how','1');
+  document.getElementById('howBg').classList.remove('open');
+  const t=pendingHow; pendingHow=null; if(t)t();
+});
+
+/* ---------- 20. ESC 关闭覆盖层 ---------- */
+document.addEventListener('keydown',e=>{ if(e.key!=='Escape')return;
+  ['memberScreen','loginScreen'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
+});
+</script>
+</body>
+</html>
