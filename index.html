@@ -469,6 +469,24 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 .reading p{font-size:15.5px;line-height:1.95;color:#e7e6f2}
 .reading .rhead{font-size:15px}
 @media(max-width:640px){ .reading p{font-size:15px;line-height:1.9} }
+
+/* ===== 对话式追问 ===== */
+.chat{max-width:700px;margin:22px auto 0;text-align:left}
+.chat-hd{display:flex;align-items:center;gap:12px;color:var(--gold-soft);font-size:13px;letter-spacing:2px;justify-content:center;margin-bottom:14px}
+.chat-line{height:1px;width:38px;background:linear-gradient(90deg,transparent,var(--gold-dim))}
+.chat-hd .chat-line:last-child{background:linear-gradient(90deg,var(--gold-dim),transparent)}
+.chat-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px}
+.chat-chip{padding:8px 14px;border:1px solid var(--line);border-radius:18px;background:rgba(8,10,20,.4);color:var(--gold-soft);font-size:12.5px;cursor:pointer;font-family:inherit;transition:.2s}
+.chat-chip:hover{border-color:var(--gold-dim);color:var(--gold);background:rgba(231,201,138,.08)}
+.chat-log{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.cmsg{max-width:84%;padding:11px 15px;border-radius:16px;font-size:14.5px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.cmsg.me{align-self:flex-end;background:linear-gradient(180deg,rgba(231,201,138,.22),rgba(231,201,138,.08));border:1px solid var(--gold-dim);color:var(--text);border-bottom-right-radius:5px}
+.cmsg.ai{align-self:flex-start;background:var(--panel);border:1px solid var(--line);color:#e7e6f2;border-bottom-left-radius:5px}
+.chat-box{display:flex;gap:10px;align-items:center}
+.chat-box input{flex:1;padding:13px 16px;background:rgba(8,10,20,.55);border:1px solid var(--line);border-radius:24px;color:var(--text);font-size:14.5px;font-family:inherit}
+.chat-box input:focus{outline:none;border-color:var(--gold-dim)}
+.chat-box button{width:44px;height:44px;flex-shrink:0;border-radius:50%;border:none;background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408;font-size:18px;cursor:pointer}
+.chat-box button:hover{box-shadow:0 6px 20px rgba(232,200,122,.4)}
 </style>
 </head>
 <body>
@@ -537,6 +555,7 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
     <div id="verdictBox"></div>
     <div class="cards" id="cards"></div>
     <div id="readingBox"></div>
+    <div id="chatWrap"></div>
     <button class="again" id="again">↺ 再占一次</button>
   </div>
 </main>
@@ -918,10 +937,10 @@ async function revealAndRead(q,spread,draws){
   try{ Voice.speak(currentReader.open(q), currentReader.voice); }catch(e){}  // 塔罗师开口
   const panel=box.querySelector(".reading");
 
-  let usedAI=false;
+  let usedAI=false, readingText="";
   if(aiReady || (aiCfg.use && aiCfg.key)){
     try{
-      await streamAI(q,spread,draws,(full)=>{
+      readingText=await streamAI(q,spread,draws,(full)=>{
         panel.innerHTML=`<div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 的解读</div>`+
           formatStream(full)+`<span class="cursor"></span>`;
         box.scrollIntoView({behavior:"smooth",block:"nearest"});
@@ -938,7 +957,47 @@ async function revealAndRead(q,spread,draws){
   }
   const _panel=box.querySelector('.reading'); if(_panel && !_panel.querySelector('.reading-sign')){ _panel.insertAdjacentHTML('beforeend',`<p class="reading-sign serif">—— ${currentReader.name}</p>`); }
   if(!box.querySelector('.reading-disclaimer')){ box.insertAdjacentHTML('beforeend','<p class="reading-disclaimer">✦ 塔罗解读仅供娱乐与自我探索 · 不构成医疗、法律、财务或心理等专业建议，请把决定权留给你自己。<br>牌序由系统即时随机生成，与你是否付费无关。</p>'); }
+  if(usedAI && readingText){ try{ mountChat(q,spread,draws,readingText); }catch(e){} }
   busy=false;document.getElementById("send").disabled=false;
+}
+
+/* ---------- 6c. 对话式追问（翻牌后和塔罗师继续聊） ---------- */
+let chatCtx=null;
+function mountChat(q,spread,draws,readingText){
+  const wrap=document.getElementById("chatWrap"); if(!wrap)return;
+  const r=currentReader, cards=draws.map((d,i)=>`${spread.pos[i]||("位"+(i+1))}:${d.card.n}(${d.rev?'逆':'正'})`).join("、");
+  chatCtx={ reader:r, busy:false, messages:[{role:"system",content:
+`你是塔罗师【${r.name}】（${r.desc}）。刚才你为来访者做了一次「${spread.name}」解读。现在 TA 想继续追问。请以【${r.name}】的口吻，温暖、口语化地回应——像深夜里懂 TA 的朋友在聊天：简短（2~4 句，最多 80 字），具体、有共情、可落地；顺着 TA 的话往深处接，可以适度反问一句引导 TA 自己看清。不要重复整段解读，不要用 markdown、井号、星号。
+背景——TA 的问题：「${q}」；抽到的牌：${cards}；你刚才的解读大意：${String(readingText).slice(0,400)}`}] };
+  wrap.innerHTML=`<div class="chat">
+    <div class="chat-hd"><span class="chat-line"></span><span>继续和 ${r.name} 聊聊</span><span class="chat-line"></span></div>
+    <div class="chat-chips" id="chatChips"></div>
+    <div class="chat-log" id="chatLog"></div>
+    <div class="chat-box"><input id="chatInput" maxlength="80" placeholder="想再问 ${r.name} 点什么…" autocomplete="off"><button id="chatSend" aria-label="发送">↑</button></div>
+  </div>`;
+  const CHIPS=["那我接下来该怎么做？","这件事还有转机吗？","为什么会变成这样？","能再说细一点吗？"];
+  document.getElementById("chatChips").innerHTML=CHIPS.map(c=>`<button class="chat-chip">${c}</button>`).join("");
+  document.querySelectorAll(".chat-chip").forEach(b=>b.addEventListener("click",()=>sendChat(b.textContent)));
+  document.getElementById("chatSend").addEventListener("click",()=>sendChat());
+  document.getElementById("chatInput").addEventListener("keydown",e=>{ if(e.key==="Enter")sendChat(); });
+}
+async function sendChat(preset){
+  if(!chatCtx||chatCtx.busy)return;
+  const input=document.getElementById("chatInput");
+  const text=(preset||input.value||"").trim(); if(!text)return;
+  input.value=""; chatCtx.busy=true;
+  const log=document.getElementById("chatLog");
+  log.insertAdjacentHTML("beforeend",`<div class="cmsg me">${text.replace(/</g,"&lt;")}</div>`);
+  const aiEl=document.createElement("div"); aiEl.className="cmsg ai"; aiEl.innerHTML=`<span class="dots"></span>`; log.appendChild(aiEl);
+  aiEl.scrollIntoView({behavior:"smooth",block:"nearest"});
+  chatCtx.messages.push({role:"user",content:text});
+  try{
+    const reply=await streamMessages(chatCtx.messages,(full)=>{ aiEl.textContent=full; aiEl.scrollIntoView({behavior:"smooth",block:"nearest"}); },0.9);
+    chatCtx.messages.push({role:"assistant",content:reply});
+  }catch(e){ aiEl.textContent="（这一刻牌面有些朦胧，稍后再问我一次吧。）"; }
+  chatCtx.busy=false;
+  // 控制上下文长度，避免过长
+  if(chatCtx.messages.length>14) chatCtx.messages.splice(1,2);
 }
 
 /* ---------- 7. 内置解读（兜底） ---------- */
@@ -983,10 +1042,10 @@ function buildMessages(q,spread,draws){
     {role:"user",content:`我的问题：${q}\n牌阵：${spread.name}\n抽到的牌：\n${cards}`}
   ];
 }
-async function streamAI(q,spread,draws,onToken){
-  const messages=buildMessages(q,spread,draws);
+async function streamMessages(messages,onToken,temp){
+  const temperature=typeof temp==="number"?temp:0.85;
   if(IS_NATIVE && aiCfg.key){ // 原生 App：非流式直连（CapacitorHttp 绕过跨域），拿全文后逐字显示
-    const r=await fetch(aiCfg.base.replace(/\/+$/,"")+"/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+aiCfg.key},body:JSON.stringify({model:aiCfg.model,messages,temperature:0.85,stream:false})});
+    const r=await fetch(aiCfg.base.replace(/\/+$/,"")+"/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+aiCfg.key},body:JSON.stringify({model:aiCfg.model,messages,temperature,stream:false})});
     if(!r.ok) throw new Error("HTTP "+r.status);
     const j=await r.json(); const full=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||"";
     if(!full) throw new Error("空响应");
@@ -995,11 +1054,11 @@ async function streamAI(q,spread,draws,onToken){
   }
   let res;
   if(aiReady){ // 走本地后端（推荐）
-    res=await fetch("/api/reading",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages,temperature:0.85})});
+    res=await fetch("/api/reading",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages,temperature})});
   }else{ // 浏览器直连（备用，可能跨域失败）
     res=await fetch(aiCfg.base.replace(/\/+$/,"")+"/chat/completions",{method:"POST",
       headers:{"Content-Type":"application/json","Authorization":"Bearer "+aiCfg.key},
-      body:JSON.stringify({model:aiCfg.model,messages,temperature:0.85,stream:true})});
+      body:JSON.stringify({model:aiCfg.model,messages,temperature,stream:true})});
   }
   if(!res.ok){let t="";try{t=(await res.json()).error||"";}catch(e){t=await res.text();}throw new Error("服务返回 "+res.status+(t?(" · "+String(t).slice(0,80)):""));}
   const reader=res.body.getReader();const dec=new TextDecoder();let buf="",full="";
@@ -1017,6 +1076,7 @@ async function streamAI(q,spread,draws,onToken){
   if(!full)throw new Error("空响应");
   return full;
 }
+async function streamAI(q,spread,draws,onToken){ return streamMessages(buildMessages(q,spread,draws),onToken,0.85); }
 function formatStream(text){return text.split(/\n+/).filter(s=>s.trim()).map(s=>{s=s.replace(/[*#`]/g,"");s=s.replace(/^【([^】]+)】/,'<span class="rlead">【$1】</span> ');return `<p>${s}</p>`;}).join("");}
 
 /* ---------- 9. 全息倾斜 + 粒子 ---------- */
