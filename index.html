@@ -154,10 +154,12 @@ html[data-theme="light"] h1{background:linear-gradient(180deg,#5a4a2a,var(--gold
 .quick span:hover,.quick span.on{color:var(--gold)}
 .modes-title{margin:50px 0 18px;color:var(--gold-soft);font-size:13px;letter-spacing:2px}
 .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
-.chip{padding:9px 16px;border:1px solid var(--line);border-radius:22px;font-size:13px;color:var(--text-dim);cursor:pointer;transition:.2s;display:flex;gap:7px;align-items:center}
-.chip:hover{border-color:var(--gold-dim);color:var(--gold);transform:translateY(-2px)}
-.chip.on{border-color:var(--gold);color:var(--gold);background:rgba(232,200,122,.08)}
-.chip small{color:var(--gold-dim)}
+.chip{padding:9px 15px;border:1px solid var(--line);border-radius:16px;color:var(--text-dim);cursor:pointer;transition:.2s;display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1.3}
+.chip:hover{border-color:var(--gold-dim);transform:translateY(-2px)}
+.chip.on{border-color:var(--gold);background:rgba(232,200,122,.08)}
+.chip b{color:var(--gold-soft);font-weight:500;font-size:13.5px}
+.chip:hover b,.chip.on b{color:var(--gold)}
+.chip small{color:var(--text-dim);font-size:11px}
 
 /* ================= 结果区 ================= */
 #result{margin-top:48px;display:none}
@@ -261,9 +263,7 @@ html[data-theme="light"] h1{background:linear-gradient(180deg,#5a4a2a,var(--gold
 @keyframes fcBreath{0%,100%{opacity:.16}50%{opacity:.46}}
 @keyframes fcSheen{0%{transform:translateX(-185%) skewX(-15deg)}54%,100%{transform:translateX(330%) skewX(-15deg)}}
 .fcard .fnum{position:absolute;inset:0;z-index:3;display:grid;place-items:center;font-size:44px;color:var(--gold);font-family:"Noto Serif SC",serif;text-shadow:0 0 18px #000;background:rgba(8,10,20,.42);border-radius:12px}
-@media(max-width:680px){ .fan-head{margin-top:1.8vh} .fan-arc{top:80vh;--R:36vh} .fcard{--w:86px} .fcard:hover{--lift:34px} .fcard.chosen{--lift:58px}
-  /* 78张时手机减负：去掉逐张呼吸光层、流光用普通混合（更省GPU、更顺） */
-  .fcard::before{display:none} .fcard::after{mix-blend-mode:normal;background:linear-gradient(100deg,transparent 10%,rgba(255,246,220,.4) 50%,transparent 90%)} }
+@media(max-width:680px){ .fan-head{margin-top:1.8vh} .fan-arc{top:80vh;--R:38vh} .fcard{--w:108px} .fcard:hover{--lift:36px} .fcard.chosen{--lift:62px} }
 .fan-reshuffle{position:fixed;bottom:max(30px,calc(env(safe-area-inset-bottom) + 18px));left:50%;transform:translateX(-50%);z-index:7;padding:11px 26px;border:1px solid var(--gold-dim);background:rgba(8,10,20,.6);color:var(--gold);border-radius:22px;font-size:13.5px;cursor:pointer;font-family:inherit;backdrop-filter:blur(4px)}
 .fan-reshuffle:hover{background:rgba(231,201,138,.12)}
 .fan-close{position:fixed;top:22px;right:26px;z-index:7;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:rgba(8,10,20,.5);color:var(--text-dim);font-size:17px;cursor:pointer}
@@ -357,8 +357,14 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 .plan ul{list-style:none;margin:18px 0 22px;flex:1;display:flex;flex-direction:column;gap:11px}
 .plan li{color:var(--text);font-size:13px;line-height:1.5;display:flex;gap:9px;align-items:flex-start}
 .plan li::before{content:"✦";color:var(--gold-soft);flex-shrink:0;font-size:10px;margin-top:3px}
-.plan li.off{color:var(--text-dim);opacity:.45}
-.plan li.off::before{content:"·";color:var(--text-dim);font-size:14px;margin-top:0}
+.plan li.off{color:var(--text-dim);opacity:.72}
+.plan li.off::before{content:"🔒";color:var(--text-dim);font-size:11px;margin-top:2px;filter:grayscale(1)}
+@media(max-width:680px){
+  .plans{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;padding:4px 2px 14px;-webkit-overflow-scrolling:touch}
+  .plan{flex:0 0 80%;scroll-snap-align:center;padding:28px 22px 22px}
+  .mb-head{margin-bottom:14px}
+  .mb-foot::before{content:"← 左右滑动对比三档 →";display:block;color:var(--gold-soft);font-size:12px;margin-bottom:10px;letter-spacing:1px}
+}
 .plan-btn{padding:13px;border-radius:13px;border:none;font-size:14.5px;cursor:pointer;font-family:inherit;transition:.2s;font-weight:500}
 .plan-btn.cur{background:transparent;border:1px solid var(--line);color:var(--text-dim);cursor:default}
 .plan-btn.go{background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408}
@@ -404,7 +410,7 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 
 /* ===== 玩法进入页 ===== */
 #modeScreen{position:fixed;inset:0;z-index:140;display:none;flex-direction:column;align-items:center;justify-content:flex-start;
-  padding:6vh 5vw 5vh;overflow-y:auto;background:radial-gradient(120% 90% at 50% 0%, rgba(12,18,38,.95), rgba(5,5,12,.99) 66%)}
+  padding:6vh 5vw 5vh;overflow-y:auto;background:radial-gradient(120% 90% at 50% 0%, #0c1226 0%, #05050c 64%)}
 #modeScreen::before{content:"";position:fixed;inset:0;z-index:-1;background:#06050e url('assets/web/corridor.webp') center/cover fixed;opacity:.16}
 #modeScreen.open{display:flex;animation:fade .5s}
 .ms-wrap{width:min(560px,94vw);text-align:center;margin:auto 0}
@@ -459,7 +465,7 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 </head>
 <body>
 <div id="heroBg"></div>
-<video id="heroVid" src="hero.mp4" autoplay muted loop playsinline></video>
+<video id="heroVid" src="hero.mp4" muted loop playsinline preload="auto"></video>
 <div id="heroScrim"></div>
 <div id="nebula"></div>
 <div id="stars"></div>
@@ -475,7 +481,6 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
     <div class="intro-tag">叩问命运 · 照见自己</div>
     <div class="intro-cta" id="introCta"><button class="enter-btn" id="enterBtn">✦ 推 门 进 入 ✦</button></div>
   </div>
-  <div class="intro-soundhint" id="introSoundHint">♪ 轻触画面 · 开启声音</div>
   <button id="skipIntro">跳过 →</button>
 </div>
 
@@ -498,7 +503,7 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
   <p class="sub" id="heroSub">答案一直在你心里 · 只是还没被看见</p>
 
   <div class="ask">
-    <textarea id="question" placeholder="此刻，你心里最想问的是什么？（例如：我现在有点乱，下一步该怎么走？/ 这段关系该何去何从？/ 我该把重心放在哪里？）"></textarea>
+    <textarea id="question" placeholder="此刻你最想问的是什么？（例如：这段关系该何去何从？）"></textarea>
     <div class="row">
       <div class="reader-sel" id="readerSel">
         <div class="rav" id="readerAv">✦</div>
@@ -539,9 +544,9 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 <div id="readerScreen">
   <div class="rs-head">
     <div>
-      <div class="rs-kicker cinzel">CHOOSE YOUR ORACLE</div>
-      <h2 class="rs-title serif">叩响一扇门</h2>
-      <p class="rs-sub">五位塔罗师，各有前世今生。选一位与你共鸣的，由 TA 为你解读 · 随时可换</p>
+      <div class="rs-kicker cinzel">CHOOSE YOUR READER</div>
+      <h2 class="rs-title serif">选择你的塔罗师</h2>
+      <p class="rs-sub">五位塔罗师，各有前世今生与擅长。选一位与你共鸣的，由 TA 为你解读 · 随时可换</p>
     </div>
     <button class="rs-close" id="rsClose">✕</button>
   </div>
@@ -600,7 +605,7 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
       <button class="soc-btn" data-soc="Google"><svg class="ico" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.5 13.3l7.9 6.1C12.3 13.2 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 3-2.2 5.5-4.7 7.2l7.3 5.7C43.7 37.9 46.5 31.8 46.5 24.5z"/><path fill="#FBBC05" d="M10.4 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.5 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.3 0 11.6-2.1 15.5-5.7l-7.3-5.7c-2 1.4-4.7 2.3-8.2 2.3-6.3 0-11.7-3.7-13.6-9.1l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>使用 Google 继续</button>
       <button class="soc-btn" data-soc="Apple"><svg class="ico" viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.8c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.6.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.4 0-2.8.8-3.5 2.1-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.5 2.2 2.6 2.2 1 0 1.4-.7 2.7-.7s1.6.7 2.7.7c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.3-.1 0-2.1-.8-2.1-3.5zM14.3 6.3c.6-.7 1-1.7.9-2.7-.9.1-1.9.6-2.5 1.3-.6.6-1 1.6-.9 2.6 1 .1 1.9-.5 2.5-1.2z"/></svg>使用 Apple 继续</button>
     </div>
-    <p class="login-fine">继续即代表同意我们的 <a>服务条款</a> 与 <a>隐私政策</a>。<br>演示界面 · 暂未接入真实账户系统。</p>
+    <p class="login-fine">我们<b style="color:var(--gold-soft)">不会保存或上传你的占卜提问内容</b>。继续即代表同意 <a>服务条款</a> 与 <a>隐私政策</a>。<br>演示界面 · 暂未接入真实账户系统。</p>
   </div>
 </div>
 
@@ -717,23 +722,23 @@ DECK.forEach((c,i)=>c.idx=i); // 牌序索引，对应 cards/<idx>.png（即梦�
 
 /* ---------- 2. 解读者 ---------- */
 const READERS = [
- {id:"aude",name:"奥德",av:"⚙",desc:"齿轮钟匠 · 理性洞察",age:"30+ 岁 · 男",premium:false,voice:{pitch:0.8,rate:0.98},
+ {id:"aude",name:"奥德",av:"⚙",desc:"齿轮钟匠 · 理性洞察",good:"擅长 事业抉择 · 理性拆解",age:"30+ 岁 · 男",premium:false,voice:{pitch:0.8,rate:0.98},
    blurb:"曾痴迷因果与必然的天文钟匠，倾尽一生想算准一场注定的灾祸。如今以最锋利的逻辑替你拆解牌局——开场先点破你在回避的核心。",
    open:q=>`关于「${q}」——牌已摊开，我直接说我看到的。`,
    close:"你早就知道答案了，我只是帮你把它说出口。下一步怎么走，你比谁都清楚。"},
- {id:"lyra",name:"璃音",av:"🌙",desc:"守灯人 · 温柔疗愈",age:"24 岁 · 女",premium:false,voice:{pitch:1.3,rate:0.92},
+ {id:"lyra",name:"璃音",av:"🌙",desc:"守灯人 · 温柔疗愈",good:"擅长 情感疗愈 · 温柔陪伴",age:"24 岁 · 女",premium:false,voice:{pitch:1.3,rate:0.92},
    blurb:"海岬灯塔的守灯人，一生为归航的船点灯，却没能等回所爱。她把那份温柔带进回廊——先接住你的情绪，再轻轻给你方向。",
    open:q=>`深呼吸一下。关于「${q}」，让我陪你一张一张，慢慢看过去，好吗？`,
    close:"别怕。无论牌说了什么，都请对自己温柔一点——你已经做得很好了。"},
- {id:"xuanwei",name:"玄微",av:"☯",desc:"古卷之主 · 东方玄学",age:"年龄莫测",premium:true,voice:{pitch:0.7,rate:0.86},
+ {id:"xuanwei",name:"玄微",av:"☯",desc:"古卷之主 · 东方玄学",good:"擅长 运势气数 · 东方卦理",age:"年龄莫测",premium:true,voice:{pitch:0.7,rate:0.86},
    blurb:"游历山河的古卜者，毕生续写一部未竟的《命书》。以传统牌理与气运推演，言简意深，每替一人解牌，便往书里添一页。",
    open:q=>`占问：「${q}」。静心凝神，且看此局牌象所示气数。`,
    close:"卦象已明。然天行有常，趋吉避凶在乎一心，望君善自斟酌。"},
- {id:"sera",name:"赛拉",av:"🥀",desc:"荆棘占卜师 · 犀利直言",age:"26 岁 · 女",premium:true,voice:{pitch:1.12,rate:1.04},
+ {id:"sera",name:"赛拉",av:"🥀",desc:"荆棘占卜师 · 犀利直言",good:"擅长 两难抉择 · 戳破幻象",age:"26 岁 · 女",premium:true,voice:{pitch:1.12,rate:1.04},
    blurb:"曾名动一时、因说真话被构陷陨落的占卜师。带着满身荆棘回到回廊，从此只说真相，不再讨好任何人——逃避很贵，你付得起吗？",
    open:q=>`关于「${q}」，我不哄你。牌面摆在这儿，听不听是你的事。`,
    close:"真相往往不舒服，但逃避更贵。想清楚，再动。"},
- {id:"noah",name:"诺亚",av:"✦",desc:"星尘游吟者 · 诗意仪式",age:"23 岁 · 中性",premium:true,voice:{pitch:1.0,rate:0.95},
+ {id:"noah",name:"诺亚",av:"✦",desc:"星尘游吟者 · 诗意仪式",good:"擅长 迷茫方向 · 诗意启发",age:"23 岁 · 中性",premium:true,voice:{pitch:1.0,rate:0.95},
    blurb:"四处流浪、为人唱命运之歌的游吟诗人，琴弦断尽于一场暴风雪。回廊收留了他——他把每次占卜写成一首诗，用意象与隐喻说真相。",
    open:q=>`让我为「${q}」，弹一支命运的小调……牌啊，请你低语。`,
    close:"我给你的是一首诗——但它仍然是真相。带着它走吧。"},
@@ -742,24 +747,24 @@ let currentReader = null; // 未选择塔罗师（需先在"叩响一扇门"里�
 
 /* ---------- 3. 牌阵 ---------- */
 const SPREADS = {
- daily:   {name:"今日一牌",icon:"📅",n:1,pos:["今日指引"]},
- triangle:{name:"圣三角",icon:"△",n:3,pos:["过去 · 根源","现在 · 核心","未来 · 走向"]},
- love:    {name:"爱情占卜",icon:"💞",n:3,pos:["你的状态","对方的状态","关系的走向"]},
- celtic:  {name:"凯尔特十字",icon:"✚",n:10,pos:["现状","眼前挑战","根基（远因）","近期过去","可能的未来","即将到来","你的心态","外部影响","希望与恐惧","最终结果"]},
- yesno:   {name:"是与否",icon:"☯",n:1,pos:["核心指示"],yn:true},
+ daily:   {name:"今日一牌",icon:"☀",n:1,pos:["今日指引"],sub:"每天一张 · 今天的指引"},
+ triangle:{name:"时光三牌",icon:"△",n:3,pos:["过去 · 根源","现在 · 核心","未来 · 走向"],sub:"过去 · 现在 · 未来，3 张"},
+ love:    {name:"爱情占卜",icon:"♡",n:3,pos:["你的状态","对方的状态","关系的走向"],sub:"你 · 对方 · 关系，3 张"},
+ celtic:  {name:"凯尔特十字",icon:"✚",n:10,pos:["现状","眼前挑战","根基（远因）","近期过去","可能的未来","即将到来","你的心态","外部影响","希望与恐惧","最终结果"],sub:"10 张全面剖析 · 适合大抉择"},
+ yesno:   {name:"是与否",icon:"☯",n:1,pos:["核心指示"],yn:true,sub:"一张牌给你「是 / 否」"},
 };
 let currentSpread = "triangle";
 
 /* ---------- 4. 导航 / 玩法 ---------- */
 const NAV=[
- {t:"塔罗",dd:[["📅","今日一牌","daily"],["△","圣三角","triangle"],["✚","凯尔特十字","celtic"],["💞","爱情占卜","love"],["☯","是与否","yesno"]]},
- {t:"雷诺曼",dd:[["🂠","单牌指引","daily"],["🃏","三牌连读","triangle"]]},
- {t:"答案之书",dd:[["📖","随机一答","yesno"]]},
- {t:"献愿",dd:[["🕯️","许个愿","daily"]]},
+ {t:"塔罗",dd:[["☀","今日一牌","daily"],["△","时光三牌","triangle"],["✚","凯尔特十字","celtic"],["♡","爱情占卜","love"],["☯","是与否","yesno"]]},
+ {t:"雷诺曼",dd:[["·","单牌指引","daily"],["·","三牌连读","triangle"]]},
+ {t:"答案之书",dd:[["·","随机一答","yesno"]]},
+ {t:"献愿",dd:[["·","许个愿","daily"]]},
 ];
 document.getElementById("nav").innerHTML=NAV.map(g=>`<div class="item">${g.t} ▾<div class="dd">${g.dd.map(d=>`<a data-spread="${d[2]}">${d[1]}</a>`).join("")}</div></div>`).join("");
-const CHIPS=[["△","圣三角","triangle",57],["💞","爱情占卜","love",36],["✚","凯尔特十字","celtic",28],["📅","今日一牌","daily",27],["☯","是与否","yesno",11]];
-document.getElementById("chips").innerHTML=CHIPS.map(c=>`<div class="chip" data-spread="${c[2]}">${c[1]}<small>♡ ${c[3]}人</small></div>`).join("");
+const CHIPS=["triangle","love","celtic","daily","yesno"];
+document.getElementById("chips").innerHTML=CHIPS.map(k=>`<div class="chip" data-spread="${k}"><b>${SPREADS[k].name}</b><small>${SPREADS[k].sub}</small></div>`).join("");
 document.getElementById("quick").innerHTML=`<span data-spread="triangle" class="on">▸ 直接占</span><span data-spread="daily">今日一牌</span><span data-spread="yesno">YES / NO</span>`;
 document.getElementById("readerDd").innerHTML=READERS.map(r=>`<div class="r" data-reader="${r.id}"><div class="rav"><img src="assets/web/reader_${r.id}.webp" alt=""></div><div><b>${r.name}${r.premium?' <span style="color:var(--gold-dim);font-size:11px;border:1px solid var(--line);border-radius:8px;padding:0 5px">✦ 会员</span>':''}</b><span>${r.desc}</span></div></div>`).join("");
 
@@ -776,7 +781,7 @@ function renderReaderScreen(){
       <div class="rs-portrait" style="background-image:url('assets/web/reader_${r.id}.webp')">${r.premium?'<span class="rs-vip">✦ 会员</span>':''}</div>
       <div class="rs-body">
         <div class="rs-name serif">${r.name}</div>
-        <div class="rs-meta">${r.desc} · ${r.age}</div>
+        <div class="rs-meta">${r.desc} · ${r.age}<br><span style="color:var(--gold-soft)">${r.good||''}</span></div>
         <div class="rs-blurb">${r.blurb}</div>
         <button class="rs-btn ${cur?'cur':(r.premium?'vip':'free')}" data-pick="${r.id}">${cur?'已选定':(r.premium?'✦ 叩门 · 会员':'选择 TA')}</button>
       </div></div>`;
@@ -803,7 +808,7 @@ let fanCtx=null;
 let fanBusy=false;
 async function doReading(){
   if(busy)return;
-  if(!currentReader){ toast&&toast("先叩响一扇门，选一位塔罗师"); openReaderScreen(); return; }
+  if(!currentReader){ toast&&toast("请先选一位塔罗师"); openReaderScreen(); return; }
   if(!document.getElementById("intro")?.classList.contains("gone")) enterApp();
   const q=document.getElementById("question").value.trim()||"我此刻最该关注什么？";
   const spread=SPREADS[currentSpread];
@@ -821,7 +826,7 @@ function renderFan(){
     hint.textContent = left>0 ? `${spread.icon} ${spread.name} · 还需选 ${left} 张` : "命运已定 · 正在揭示…"; };
   setHead();
   const mob=window.matchMedia("(max-width:680px)").matches;
-  const N=DECK.length, SPAN=mob?52:58, arc=document.getElementById("fanArc"); let h="";   // 完整一副 78 张
+  const N=mob?30:DECK.length, SPAN=mob?44:58, arc=document.getElementById("fanArc"); let h="";   // 桌面整副78张；手机30张更大更精致
   for(let i=0;i<N;i++){ const deg=((i-(N-1)/2)/((N-1)/2))*SPAN; const sd=(i/N*5.6).toFixed(2);
     h+=`<div class="fcard deal" style="--deg:${deg}deg;--sheen-delay:-${sd}s;z-index:${i}"></div>`; }
   arc.innerHTML=h;
@@ -896,7 +901,7 @@ async function revealAndRead(q,spread,draws){
   }
 
   const box=document.getElementById("readingBox");
-  box.innerHTML=`<div class="reading"><div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 正在凝视牌面<span class="dots"></span></div></div>`;
+  box.innerHTML=`<div class="reading"><div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 正在为你凝神感受这几张牌 · 别急，慢慢来<span class="dots"></span></div></div>`;
   try{ Voice.speak(currentReader.open(q), currentReader.voice); }catch(e){}  // 塔罗师开口
   const panel=box.querySelector(".reading");
 
@@ -918,7 +923,7 @@ async function revealAndRead(q,spread,draws){
     await wait(450);
     panel.innerHTML=`<div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 的解读</div>`+localReading(q,spread,draws);
   }
-  if(!box.querySelector('.reading-disclaimer')){ box.insertAdjacentHTML('beforeend','<p class="reading-disclaimer">✦ 塔罗解读仅供娱乐与自我探索 · 不构成医疗、法律、财务或心理等专业建议，请把决定权留给你自己。</p>'); }
+  if(!box.querySelector('.reading-disclaimer')){ box.insertAdjacentHTML('beforeend','<p class="reading-disclaimer">✦ 塔罗解读仅供娱乐与自我探索 · 不构成医疗、法律、财务或心理等专业建议，请把决定权留给你自己。<br>牌序由系统即时随机生成，与你是否付费无关。</p>'); }
   busy=false;document.getElementById("send").disabled=false;
 }
 
@@ -1029,13 +1034,13 @@ const Music=(function(){
     [43.65,65.41,87.31,130.81],    // F 更荒芜
   ];
   const tollNotes=[55.00,73.42,82.41,98.00]; // 命运钟声基频（深沉）
-  function init(){
+  function init(withWind){
     if(ctx)return;
     ctx=new (window.AudioContext||window.webkitAudioContext)();
     master=ctx.createGain();master.gain.value=0;
     const comp=ctx.createDynamicsCompressor();master.connect(comp);comp.connect(ctx.destination);
     reverb=makeReverb(4.2);const wet=ctx.createGain();wet.gain.value=0.7;reverb.connect(wet);wet.connect(master);
-    startWind();
+    if(withWind) startWind();
   }
   function makeReverb(sec){
     const len=Math.floor(ctx.sampleRate*sec);const buf=ctx.createBuffer(2,len,ctx.sampleRate);
@@ -1084,7 +1089,8 @@ const Music=(function(){
     timers.push(setTimeout(whisper,22000+Math.random()*25000));
   }
   return {
-    start(){try{init();if(ctx.state==="suspended")ctx.resume();on=true;master.gain.cancelScheduledValues(ctx.currentTime);master.gain.linearRampToValueAtTime(0.16,ctx.currentTime+5);nextChord();timers.push(setTimeout(toll,4000));timers.push(setTimeout(whisper,12000));}catch(e){}},
+    arm(){try{init(false);if(ctx.state==="suspended")ctx.resume();on=true;master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setValueAtTime(0.75,ctx.currentTime);}catch(e){}},   // 仅启用音效(点牌/洗牌)，不跑氛围乐，避免与背景视频乐打架
+    start(){try{init(true);if(ctx.state==="suspended")ctx.resume();on=true;master.gain.cancelScheduledValues(ctx.currentTime);master.gain.linearRampToValueAtTime(0.16,ctx.currentTime+5);nextChord();timers.push(setTimeout(toll,4000));timers.push(setTimeout(whisper,12000));}catch(e){}},
     stop(){on=false;try{master.gain.linearRampToValueAtTime(0,ctx.currentTime+2);}catch(e){}timers.forEach(clearTimeout);timers=[];if(stopPad){stopPad();stopPad=null;}},
     ping(){if(!ctx||!on)return;try{const base=146.83,partials=[1,2.76,5.4];const p=ctx.createStereoPanner();p.connect(master);p.connect(reverb);partials.forEach((m,i)=>{const o=ctx.createOscillator();o.type="sine";o.frequency.value=base*m;const g=ctx.createGain();g.gain.value=0;o.connect(g);g.connect(p);g.gain.linearRampToValueAtTime(0.12/(i+1),ctx.currentTime+0.01);g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+2.2);o.start();o.stop(ctx.currentTime+2.3);});}catch(e){}},
     shuffle(){if(!ctx||!on)return;try{ // 洗牌：三段快速带通噪声扫频（“刷刷刷”）
@@ -1127,24 +1133,15 @@ function enterApp(){
   intro.classList.add("gone");sessionStorage.setItem("stella_entered","1");
   if(window.__introStop)window.__introStop();
   setTimeout(()=>intro.remove(),1000);
-  // 取消主界面视频静音 → 播放即梦自带的音效/配音（需用户手势，进入这一下即是手势）
-  const hv=document.getElementById('heroVid'); if(hv&&soundOn){ hv.muted=false; if(hv.play) hv.play().catch(()=>{}); }
+  try{ if(soundOn) Music.arm(); }catch(e){}                                  // 手势内启用音效引擎（点牌/洗牌音效）
+  const hv=document.getElementById('heroVid'); if(hv){ hv.muted=!soundOn; if(hv.play) hv.play().catch(()=>{}); } // 进入即播放背景视频（开声=背景乐）
+  const iv=document.getElementById('introVid'); if(iv){ try{iv.pause();}catch(e){} }   // 停掉开场视频解码（省电）
+  updateHero();
 }
 document.getElementById("enterBtn")?.addEventListener("click",enterApp);
 document.getElementById("skipIntro")?.addEventListener("click",enterApp);
-// 开场：轻触画面开启声音（绕过自动播放静音限制；点“推门进入/跳过”仍直接进入）
-let introSoundOn=false;
-function enableIntroSound(){
-  if(introSoundOn)return; introSoundOn=true;
-  const iv=document.getElementById('introVid');
-  if(iv){ iv.muted=false; try{iv.volume=0.85;}catch(e){} if(iv.play)iv.play().catch(()=>{}); }
-  document.getElementById('introSoundHint')?.classList.add('gone');
-}
-document.getElementById('intro')?.addEventListener('click',e=>{
-  if(e.target.closest('#enterBtn,#skipIntro'))return;
-  enableIntroSound();
-});
-setTimeout(()=>document.getElementById('introSoundHint')?.classList.add('show'),1900);
+// 轻触开场任意处即可进入（声音随进入开启；按钮自身已绑定 enterApp）
+document.getElementById('intro')?.addEventListener('click',e=>{ if(e.target.closest('#enterBtn,#skipIntro'))return; enterApp(); });
 
 /* ---------- 12. 设置弹窗 ---------- */
 const modalBg=document.getElementById("modalBg");
@@ -1183,7 +1180,7 @@ document.getElementById("fabFb").addEventListener("click",()=>alert("感谢你�
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
 /* ---------- 14. 背景星空 ---------- */
-(function(){let h="";for(let i=0;i<110;i++){const s=Math.random()*2+1;h+=`<div class="star" style="left:${Math.random()*100}%;top:${Math.random()*100}%;width:${s}px;height:${s}px;animation-delay:${Math.random()*4}s"></div>`;}document.getElementById("stars").innerHTML=h;})();
+(function(){const COUNT=window.matchMedia("(max-width:680px)").matches?34:64;let h="";for(let i=0;i<COUNT;i++){const s=Math.random()*2+1;h+=`<div class="star" style="left:${Math.random()*100}%;top:${Math.random()*100}%;width:${s}px;height:${s}px;animation-delay:${Math.random()*4}s"></div>`;}document.getElementById("stars").innerHTML=h;})();
 
 /* ---------- 15. 启动时检测后端 AI ---------- */
 fetch("/api/health").then(r=>r.json()).then(j=>{
@@ -1193,6 +1190,17 @@ fetch("/api/health").then(r=>r.json()).then(j=>{
 /* ---------- 16. PWA Service Worker ---------- */
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
 document.getElementById('heroVid')?.addEventListener('loadeddata',function(){ this.classList.add('ready'); });
+/* 性能：背景视频只在「主屏可见」时播放；开场、抽牌、各覆盖层、切后台时一律暂停（省电省卡顿） */
+function updateHero(){
+  const hv=document.getElementById('heroVid'); if(!hv)return;
+  const intro=document.getElementById('intro'); const introGone=!intro||intro.classList.contains('gone');
+  const overlay=['drawFan','modeScreen','readerScreen','memberScreen','loginScreen','howBg'].some(id=>{const e=document.getElementById(id);return e&&(e.classList.contains('open')||e.classList.contains('show'));});
+  const shouldPlay=introGone && !overlay && !document.hidden;
+  if(shouldPlay){ if(hv.paused) hv.play().catch(()=>{}); }
+  else if(!hv.paused){ try{hv.pause();}catch(e){} }
+}
+setInterval(updateHero, 900);
+document.addEventListener('visibilitychange', updateHero);
 
 /* ---------- 16b. 玩法进入页 + 切换过渡 ---------- */
 const MODE_NOTE={
@@ -1208,7 +1216,7 @@ function renderMsReaders(){
   box.innerHTML=READERS.map((r,i)=>`<div class="ms-av ${i===msReaderIdx?'sel':''}" data-ri="${i}"><img src="assets/web/reader_${r.id}.webp" alt=""></div>`).join('');
   const r=READERS[msReaderIdx];
   document.getElementById('msReaderName').textContent=r.name;
-  document.getElementById('msReaderMeta').innerHTML=`${r.desc} · ${r.age}${r.premium?' · <span style="color:var(--gold-dim)">✦ 会员</span>':''}`;
+  document.getElementById('msReaderMeta').innerHTML=`${r.desc} · ${r.age}${r.premium?' · <span style="color:var(--gold-dim)">✦ 会员</span>':''}<br><span style="color:var(--gold-soft)">${r.good||''}</span>`;
   box.querySelectorAll('[data-ri]').forEach(el=>el.addEventListener('click',()=>{ msReaderIdx=+el.dataset.ri; renderMsReaders(); try{Music.ping&&Music.ping();}catch(e){} }));
 }
 function moveMsReader(d){ msReaderIdx=(msReaderIdx+d+READERS.length)%READERS.length; renderMsReaders(); }
@@ -1221,7 +1229,7 @@ function openModeScreen(key){
   const msQ=document.getElementById('msQuestion'); msQ.value=mainQ; document.getElementById('msCount').textContent=mainQ.length;
   if(currentReader){ const idx=READERS.findIndex(r=>r.id===currentReader.id); if(idx>=0) msReaderIdx=idx; }
   renderMsReaders();
-  document.getElementById('msCost').innerHTML=`本次免费体验 · 消耗 <b>20</b> 星币（每日登录自动赠送，<b>不花真钱</b>）· 当前余额 ${coins}`;
+  document.getElementById('msCost').innerHTML=`你有 <b>${coins}</b> 星币 · 本次消耗 20，还能抽 <b>${Math.floor(coins/20)}</b> 次 · 星币每日登录免费赠送，<b>不花真钱</b>`;
   document.getElementById('msSkip').style.display=(sp.n===1)?'inline-block':'none';
   if(!document.getElementById("intro")?.classList.contains("gone")) enterApp();
   showLoading(sp.name, ()=>document.getElementById('modeScreen').classList.add('open'));
