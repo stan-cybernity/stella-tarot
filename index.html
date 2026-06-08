@@ -240,12 +240,14 @@ html[data-theme="light"] h1{background:linear-gradient(180deg,#5a4a2a,var(--gold
   background:linear-gradient(180deg,#fff,var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .fan-hint{color:var(--text-dim);font-size:13px;margin-top:6px;letter-spacing:1px}
 .fan-arc{position:fixed;left:50%;top:125vh;z-index:2;--R:103vh}
-.fcard{--w:150px;position:absolute;width:var(--w);height:calc(var(--w)*1.58);left:0;top:0;border-radius:12px;overflow:hidden;
+.fcard{--w:128px;position:absolute;width:var(--w);height:calc(var(--w)*1.58);left:0;top:0;border-radius:11px;overflow:hidden;
   background:#0d1426 url('assets/web/back.webp') center/cover;border:1px solid var(--gold-dim);
-  transform-origin:0 0;transform:rotate(var(--deg)) translate(calc(var(--w)/-2), calc(-1*var(--R) - var(--lift,0px)));
-  transition:transform .32s cubic-bezier(.3,.7,.3,1), box-shadow .32s, filter .32s;cursor:pointer;box-shadow:0 12px 34px rgba(0,0,0,.6)}
-.fcard:hover{--lift:46px;filter:brightness(1.22);box-shadow:0 0 38px rgba(231,201,138,.5);z-index:5}
-.fcard.chosen{--lift:86px;border-color:var(--gold);box-shadow:0 0 46px rgba(231,201,138,.8);z-index:6}
+  transform-origin:0 0;transform:rotate(var(--deg)) translate(calc(var(--w)/-2), calc(-1*var(--R) - var(--lift,0px))) scale(1);
+  transition:transform .5s cubic-bezier(.2,.72,.25,1), box-shadow .32s, filter .32s, opacity .45s;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.fcard:hover{--lift:48px;filter:brightness(1.22);box-shadow:0 0 38px rgba(231,201,138,.5);z-index:5}
+.fcard.chosen{--lift:90px;border-color:var(--gold);box-shadow:0 0 46px rgba(231,201,138,.8);z-index:6}
+/* 收拢/发牌动画态：全部塌回中心、缩小、隐去 → 移除后逐张扇开 */
+.fcard.deal{transform:rotate(0deg) translate(calc(var(--w)/-2), calc(-1*var(--R))) scale(.82)!important;opacity:0;box-shadow:none}
 /* 牌背内在金光 · 缓缓呼吸（像活物） */
 .fcard::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;
   background:radial-gradient(125% 78% at 50% 28%, rgba(255,228,156,.26), transparent 70%);
@@ -259,7 +261,9 @@ html[data-theme="light"] h1{background:linear-gradient(180deg,#5a4a2a,var(--gold
 @keyframes fcBreath{0%,100%{opacity:.16}50%{opacity:.46}}
 @keyframes fcSheen{0%{transform:translateX(-185%) skewX(-15deg)}54%,100%{transform:translateX(330%) skewX(-15deg)}}
 .fcard .fnum{position:absolute;inset:0;z-index:3;display:grid;place-items:center;font-size:44px;color:var(--gold);font-family:"Noto Serif SC",serif;text-shadow:0 0 18px #000;background:rgba(8,10,20,.42);border-radius:12px}
-@media(max-width:680px){ .fan-head{margin-top:1.8vh} .fan-arc{top:78vh;--R:34vh} .fcard{--w:118px} .fcard:hover{--lift:30px} .fcard.chosen{--lift:54px} }
+@media(max-width:680px){ .fan-head{margin-top:1.8vh} .fan-arc{top:80vh;--R:36vh} .fcard{--w:86px} .fcard:hover{--lift:34px} .fcard.chosen{--lift:58px}
+  /* 78张时手机减负：去掉逐张呼吸光层、流光用普通混合（更省GPU、更顺） */
+  .fcard::before{display:none} .fcard::after{mix-blend-mode:normal;background:linear-gradient(100deg,transparent 10%,rgba(255,246,220,.4) 50%,transparent 90%)} }
 .fan-reshuffle{position:fixed;bottom:max(30px,calc(env(safe-area-inset-bottom) + 18px));left:50%;transform:translateX(-50%);z-index:7;padding:11px 26px;border:1px solid var(--gold-dim);background:rgba(8,10,20,.6);color:var(--gold);border-radius:22px;font-size:13.5px;cursor:pointer;font-family:inherit;backdrop-filter:blur(4px)}
 .fan-reshuffle:hover{background:rgba(231,201,138,.12)}
 .fan-close{position:fixed;top:22px;right:26px;z-index:7;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:rgba(8,10,20,.5);color:var(--text-dim);font-size:17px;cursor:pointer}
@@ -796,6 +800,7 @@ document.getElementById("again").addEventListener("click",()=>{document.getEleme
 /* ---------- 6. 抽牌 + 解读 ---------- */
 let busy=false;
 let fanCtx=null;
+let fanBusy=false;
 async function doReading(){
   if(busy)return;
   if(!currentReader){ toast&&toast("先叩响一扇门，选一位塔罗师"); openReaderScreen(); return; }
@@ -816,18 +821,32 @@ function renderFan(){
     hint.textContent = left>0 ? `${spread.icon} ${spread.name} · 还需选 ${left} 张` : "命运已定 · 正在揭示…"; };
   setHead();
   const mob=window.matchMedia("(max-width:680px)").matches;
-  const N=mob?17:21, SPAN=mob?40:50, arc=document.getElementById("fanArc"); let h="";
+  const N=DECK.length, SPAN=mob?52:58, arc=document.getElementById("fanArc"); let h="";   // 完整一副 78 张
   for(let i=0;i<N;i++){ const deg=((i-(N-1)/2)/((N-1)/2))*SPAN; const sd=(i/N*5.6).toFixed(2);
-    h+=`<div class="fcard" style="--deg:${deg}deg;--sheen-delay:-${sd}s"></div>`; }
+    h+=`<div class="fcard deal" style="--deg:${deg}deg;--sheen-delay:-${sd}s;z-index:${i}"></div>`; }
   arc.innerHTML=h;
-  arc.querySelectorAll(".fcard").forEach(el=>el.addEventListener("click",function(){
-    if(this.classList.contains("chosen")||picked>=need)return;
+  const cards=[...arc.querySelectorAll(".fcard")];
+  void arc.offsetWidth;                                     // 强制回流，确保 deal 起始态生效
+  const step=mob?6:8;
+  cards.forEach((el,i)=>{ setTimeout(()=>el.classList.remove("deal"), 40+i*step); });   // 逐张扇开（发牌）
+  cards.forEach(el=>el.addEventListener("click",function(){
+    if(fanBusy||this.classList.contains("chosen")||picked>=need)return;
     picked++; this.classList.add("chosen"); this.innerHTML=`<span class="fnum">${picked}</span>`; try{Music.ping();}catch(e){}
     setHead();
     if(picked>=need){ setTimeout(()=>{ document.getElementById("drawFan").classList.remove("open"); revealAndRead(fanCtx.q,fanCtx.spread,fanCtx.draws); }, 750); }
   }));
 }
-function fanReshuffle(){ if(!fanCtx)return; const sh=[...DECK].sort(()=>Math.random()-0.5); fanCtx.draws=sh.slice(0,fanCtx.spread.n).map(card=>({card,rev:Math.random()<0.5})); renderFan(); }
+function fanReshuffle(){
+  if(!fanCtx||fanBusy)return; fanBusy=true;
+  try{Music.shuffle&&Music.shuffle();}catch(e){}                         // 洗牌音效
+  const arc=document.getElementById("fanArc");
+  arc.querySelectorAll(".fcard").forEach(c=>{ c.classList.remove("chosen"); c.classList.add("deal"); }); // 全部收拢到中心
+  setTimeout(()=>{
+    const sh=[...DECK].sort(()=>Math.random()-0.5);
+    fanCtx.draws=sh.slice(0,fanCtx.spread.n).map(card=>({card,rev:Math.random()<0.5}));
+    renderFan(); fanBusy=false;                                          // 重新发牌（逐张扇开）
+  }, 440);
+}
 document.getElementById("fanReshuffle")?.addEventListener("click",fanReshuffle);
 document.getElementById("fanClose")?.addEventListener("click",()=>{document.getElementById("drawFan").classList.remove("open");});
 
@@ -1068,6 +1087,16 @@ const Music=(function(){
     start(){try{init();if(ctx.state==="suspended")ctx.resume();on=true;master.gain.cancelScheduledValues(ctx.currentTime);master.gain.linearRampToValueAtTime(0.16,ctx.currentTime+5);nextChord();timers.push(setTimeout(toll,4000));timers.push(setTimeout(whisper,12000));}catch(e){}},
     stop(){on=false;try{master.gain.linearRampToValueAtTime(0,ctx.currentTime+2);}catch(e){}timers.forEach(clearTimeout);timers=[];if(stopPad){stopPad();stopPad=null;}},
     ping(){if(!ctx||!on)return;try{const base=146.83,partials=[1,2.76,5.4];const p=ctx.createStereoPanner();p.connect(master);p.connect(reverb);partials.forEach((m,i)=>{const o=ctx.createOscillator();o.type="sine";o.frequency.value=base*m;const g=ctx.createGain();g.gain.value=0;o.connect(g);g.connect(p);g.gain.linearRampToValueAtTime(0.12/(i+1),ctx.currentTime+0.01);g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+2.2);o.start();o.stop(ctx.currentTime+2.3);});}catch(e){}},
+    shuffle(){if(!ctx||!on)return;try{ // 洗牌：三段快速带通噪声扫频（“刷刷刷”）
+      for(let k=0;k<3;k++){ const len=Math.floor(ctx.sampleRate*0.3);const buf=ctx.createBuffer(1,len,ctx.sampleRate);const d=buf.getChannelData(0);
+        for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.6);
+        const src=ctx.createBufferSource();src.buffer=buf; const bp=ctx.createBiquadFilter();bp.type="bandpass";bp.Q.value=0.8;
+        const pan=ctx.createStereoPanner();pan.pan.value=k===1?0.35:-0.3; const g=ctx.createGain();g.gain.value=0;
+        src.connect(bp);bp.connect(g);g.connect(pan);pan.connect(master);g.connect(reverb);
+        const t=ctx.currentTime+k*0.14; bp.frequency.setValueAtTime(700,t);bp.frequency.linearRampToValueAtTime(2400,t+0.26);
+        g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.085,t+0.025);g.gain.exponentialRampToValueAtTime(0.0001,t+0.28);
+        src.start(t);src.stop(t+0.32); }
+    }catch(e){}},
     get on(){return on;}
   };
 })();
