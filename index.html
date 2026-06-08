@@ -269,7 +269,8 @@ html[data-theme="light"] h1{background:linear-gradient(180deg,#5a4a2a,var(--gold
 @media(max-width:680px){ .fan-head{margin-top:1.8vh} .fan-arc{top:80vh;--R:38vh} .fcard{--w:108px} .fcard:hover{--lift:36px} .fcard.chosen{--lift:62px}
   /* 手机减负：去掉逐张呼吸光层、流光改普通混合（不再用昂贵的 mix-blend screen） */
   .fcard::before{display:none} .fcard::after{mix-blend-mode:normal;background:linear-gradient(100deg,transparent 12%,rgba(255,244,214,.42) 50%,transparent 88%)} }
-@media(max-width:680px){ #heroBg{animation:none} #nebula{animation:none;opacity:.32} #heroVid{will-change:auto} }
+@media(max-width:680px){ #heroBg{animation:none} #nebula{animation:none;opacity:.32} #heroVid{will-change:auto}
+  .ov-close,.fan-close,.rs-close{width:48px;height:48px;font-size:20px;top:16px;right:16px} }
 .fan-reshuffle{position:fixed;bottom:max(30px,calc(env(safe-area-inset-bottom) + 18px));left:50%;transform:translateX(-50%);z-index:7;padding:11px 26px;border:1px solid var(--gold-dim);background:rgba(8,10,20,.6);color:var(--gold);border-radius:22px;font-size:13.5px;cursor:pointer;font-family:inherit;backdrop-filter:blur(4px)}
 .fan-reshuffle:hover{background:rgba(231,201,138,.12)}
 .fan-close{position:fixed;top:22px;right:26px;z-index:7;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:rgba(8,10,20,.5);color:var(--text-dim);font-size:17px;cursor:pointer}
@@ -322,8 +323,8 @@ html[data-theme="light"] h1{background:linear-gradient(180deg,#5a4a2a,var(--gold
 .warn{color:#d9a86c;font-size:11.5px;margin-top:10px;line-height:1.5}
 footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-size:12px;padding:30px;opacity:.7}
 .fab{position:fixed;right:18px;bottom:18px;z-index:40;display:flex;flex-direction:column;gap:10px}
-.fab button{padding:9px 16px;border-radius:22px;border:1px solid var(--line);background:var(--bg2);color:var(--text-dim);font-size:12.5px;cursor:pointer;box-shadow:var(--shadow)}
-.fab button:hover{color:var(--gold)}
+.fab button{padding:9px 16px;border-radius:22px;border:1px solid var(--gold-dim);background:rgba(10,14,28,.55);color:var(--gold-soft);font-size:12.5px;letter-spacing:1px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.45);backdrop-filter:blur(8px)}
+.fab button:hover{color:var(--gold);border-color:var(--gold);background:rgba(231,201,138,.1)}
 @media(max-width:640px){nav{display:none}.cardbox{width:96px}.card{width:96px;height:162px}.cards{gap:14px}
   header{padding:12px 15px}.tools{gap:9px}.logo{gap:8px}.logo .name{font-size:15px}.logo .mark{width:32px;height:32px;font-size:16px}#theme,#settings{display:none}}
 
@@ -463,6 +464,7 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 
 /* ===== 解读：牌位点题 + 免责声明 + 可读性 ===== */
 .rlead{color:var(--gold);font-weight:500;font-family:"Noto Serif SC",serif}
+.reading-sign{text-align:right;margin-top:20px;color:var(--gold-soft);font-size:15px;letter-spacing:2px;opacity:.92}
 .reading-disclaimer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--text-dim);font-size:12px;line-height:1.6;text-align:center;opacity:.92}
 .reading p{font-size:15.5px;line-height:1.95;color:#e7e6f2}
 .reading .rhead{font-size:15px}
@@ -667,7 +669,7 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
   <div class="sl-label cinzel" id="slLabel"></div>
 </div>
 
-<div class="fab"><button id="fabFb">💬 反馈</button></div>
+<div class="fab"><button id="fabFb">✦ 反馈</button></div>
 <footer>星语塔罗 · Stella Tarot ｜ 仅供娱乐与自我反思，不构成任何决策建议</footer>
 
 <script>
@@ -934,6 +936,7 @@ async function revealAndRead(q,spread,draws){
     await wait(450);
     panel.innerHTML=`<div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 的解读</div>`+localReading(q,spread,draws);
   }
+  const _panel=box.querySelector('.reading'); if(_panel && !_panel.querySelector('.reading-sign')){ _panel.insertAdjacentHTML('beforeend',`<p class="reading-sign serif">—— ${currentReader.name}</p>`); }
   if(!box.querySelector('.reading-disclaimer')){ box.insertAdjacentHTML('beforeend','<p class="reading-disclaimer">✦ 塔罗解读仅供娱乐与自我探索 · 不构成医疗、法律、财务或心理等专业建议，请把决定权留给你自己。<br>牌序由系统即时随机生成，与你是否付费无关。</p>'); }
   busy=false;document.getElementById("send").disabled=false;
 }
