@@ -335,11 +335,45 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 .btn-login:hover{color:var(--gold);border-color:var(--gold-dim)}
 @media(max-width:640px){ .btn-vip{padding:6px 10px;font-size:12px} }
 
-/* ===== 全屏覆盖层：会员 / 登录 / 本命牌 ===== */
-#memberScreen,#loginScreen,#birthScreen{position:fixed;inset:0;z-index:158;display:none;flex-direction:column;padding:54px 5vw 60px;overflow-y:auto;
+/* ===== 全屏覆盖层：会员 / 登录 / 本命牌 / 今日运势 ===== */
+#memberScreen,#loginScreen,#birthScreen,#fortuneScreen{position:fixed;inset:0;z-index:158;display:none;flex-direction:column;padding:54px 5vw 60px;overflow-y:auto;
   background:rgba(5,4,11,.95) url('assets/web/corridor.webp') center/cover fixed}
-#memberScreen::before,#loginScreen::before,#birthScreen::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(125% 95% at 50% -5%, rgba(16,23,44,.78), rgba(6,5,14,.96) 68%)}
-#memberScreen.open,#loginScreen.open,#birthScreen.open{display:flex;animation:fade .45s}
+#memberScreen::before,#loginScreen::before,#birthScreen::before,#fortuneScreen::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(125% 95% at 50% -5%, rgba(16,23,44,.78), rgba(6,5,14,.96) 68%)}
+#memberScreen.open,#loginScreen.open,#birthScreen.open,#fortuneScreen.open{display:flex;animation:fade .45s}
+
+/* 主界面双入口卡（今日运势 / 本命牌） */
+.feature-ctas{max-width:560px;margin:28px auto 0;display:flex;gap:14px}
+.fcta{flex:1;padding:16px;border:1px solid var(--gold-dim);border-radius:16px;background:linear-gradient(135deg,rgba(231,201,138,.1),rgba(8,10,20,.3));cursor:pointer;transition:.2s;text-align:left}
+.fcta:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,.4)}
+.fcta b{display:block;color:var(--gold);font-size:16px;margin-bottom:5px}
+.fcta span{color:var(--text-dim);font-size:12px;line-height:1.5}
+@media(max-width:640px){ .feature-ctas{flex-direction:column} }
+
+/* 今日运势 */
+.ft-wrap{max-width:520px;margin:0 auto;width:100%;text-align:center}
+.ft-date{color:var(--gold-soft);font-size:13px;letter-spacing:2px;margin:8px 0 24px}
+.ft-gauges{display:flex;justify-content:center;gap:24px;margin-bottom:28px}
+.gauge{position:relative;width:96px;height:96px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--gold) calc(var(--v,0)*1%), rgba(255,255,255,.07) 0)}
+.gauge::before{content:"";position:absolute;width:74px;height:74px;border-radius:50%;background:#0b1020}
+.gauge .gv{position:relative;z-index:1;color:var(--gold);font-size:24px;font-family:"Cinzel",serif;line-height:1}
+.gauge .gl{display:block;margin-top:10px;color:var(--text-dim);font-size:12.5px;letter-spacing:1px}
+.ft-gitem{display:flex;flex-direction:column;align-items:center}
+.ft-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.ft-cell{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 16px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ft-cell .ft-k{color:var(--text-dim);font-size:13px}
+.ft-cell b{color:var(--text);font-size:15px}
+.ft-cell b.ft-good{color:#7ad99a}
+.ft-cell b.ft-bad{color:#e0a0a0}
+.ft-card{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;margin-bottom:22px}
+.ft-card img{width:64px;border-radius:8px;flex-shrink:0}
+.ft-card .ftc-n{color:var(--gold);font-size:16px;font-family:"Noto Serif SC",serif}
+.ft-card .ftc-d{color:var(--text-dim);font-size:12.5px;margin-top:4px;line-height:1.5}
+.ft-signin{display:flex;flex-direction:column;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(231,201,138,.1),transparent);border:1px solid var(--gold-dim);border-radius:14px;padding:18px}
+.ft-streak{color:var(--gold);font-size:15px}
+.ft-streak b{font-size:22px;font-family:"Cinzel",serif}
+.ft-signbtn{padding:12px 32px;border-radius:24px;border:none;background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:2px}
+.ft-signbtn:disabled{background:transparent;border:1px solid var(--line);color:var(--text-dim);cursor:default}
 
 /* 本命牌入口 CTA */
 .birth-cta{max-width:560px;margin:28px auto 0;display:flex;align-items:center;gap:16px;justify-content:space-between;
@@ -581,9 +615,9 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
   <div class="modes-title serif">✦ 本周热门玩法</div>
   <div class="chips" id="chips"></div>
 
-  <div class="birth-cta" id="birthCta">
-    <div class="birth-cta-txt"><b class="serif">✦ 你的本命牌</b><span>输入生日，揭晓命中注定的那张大阿卡纳，与你的塔罗人格</span></div>
-    <button class="birth-cta-btn cinzel">测一测 →</button>
+  <div class="feature-ctas">
+    <div class="fcta" id="fortuneCta"><b class="serif">☀ 今日运势</b><span>爱情 · 事业 · 财运<br>每日一签 · 连续签到</span></div>
+    <div class="fcta" id="birthCta"><b class="serif">✦ 你的本命牌</b><span>生日揭晓本命牌<br>测你的塔罗人格</span></div>
   </div>
 
   <div id="result">
@@ -742,6 +776,26 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
     </div>
     <button class="ms-draw cinzel" id="bsGo">揭 晓 本 命 牌</button>
     <div id="bsResult"></div>
+  </div>
+</div>
+
+<!-- ===== 今日运势 ===== -->
+<div id="fortuneScreen">
+  <button class="ov-close" id="ftClose">✕</button>
+  <div class="ft-wrap">
+    <div class="mb-kicker cinzel">TODAY'S FORTUNE</div>
+    <h2 class="mb-title serif">今日运势</h2>
+    <div class="ft-date" id="ftDate"></div>
+    <div class="ft-gauges" id="ftGauges"></div>
+    <div class="ft-grid">
+      <div class="ft-cell"><span class="ft-k">今日宜</span><b class="ft-good" id="ftYi">—</b></div>
+      <div class="ft-cell"><span class="ft-k">今日忌</span><b class="ft-bad" id="ftJi">—</b></div>
+      <div class="ft-cell"><span class="ft-k">幸运色</span><b id="ftColor">—</b></div>
+      <div class="ft-cell"><span class="ft-k">幸运数字</span><b id="ftNum">—</b></div>
+    </div>
+    <div class="ft-card" id="ftCard"></div>
+    <div class="ft-signin" id="ftSignin"></div>
+    <button class="ms-skip" id="ftShare" style="color:var(--gold);margin-top:16px">✦ 生成今日运势卡 · 分享</button>
   </div>
 </div>
 
@@ -1359,7 +1413,7 @@ document.getElementById('heroVid')?.addEventListener('loadeddata',function(){ th
 function updateHero(){
   const hv=document.getElementById('heroVid'); if(!hv)return;
   const intro=document.getElementById('intro'); const introGone=!intro||intro.classList.contains('gone');
-  const overlay=['drawFan','modeScreen','readerScreen','memberScreen','loginScreen','birthScreen','howBg'].some(id=>{const e=document.getElementById(id);return e&&(e.classList.contains('open')||e.classList.contains('show'));});
+  const overlay=['drawFan','modeScreen','readerScreen','memberScreen','loginScreen','birthScreen','fortuneScreen','howBg'].some(id=>{const e=document.getElementById(id);return e&&(e.classList.contains('open')||e.classList.contains('show'));});
   const shouldPlay=introGone && !overlay && !document.hidden;
   if(shouldPlay){ if(hv.paused) hv.play().catch(()=>{}); }
   else if(!hv.paused){ try{hv.pause();}catch(e){} }
@@ -1519,6 +1573,47 @@ function showPoster(url){ document.getElementById('posterImg').src=url; const dl
 document.getElementById('posterClose')?.addEventListener('click',()=>document.getElementById('posterModal').classList.remove('open'));
 document.getElementById('posterModal')?.addEventListener('click',e=>{ if(e.target.id==='posterModal') document.getElementById('posterModal').classList.remove('open'); });
 
+/* ---------- 18e. 今日运势 + 签到（按日期种子，当天稳定） ---------- */
+function _ds(salt){ const d=new Date(); const s=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()+'-'+(salt||''); let h=2166136261; for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);} return h>>>0; }
+function _rng(seed){ return function(){ seed|=0;seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const FT_YI=["表白心意","主动联系","整理收纳","早睡早起","谈成合作","出门走走","尝试新事物","向人求助","复盘总结","买一束花","断舍离","好好吃饭"];
+const FT_JI=["冲动消费","熬夜","钻牛角尖","翻旧账","做重大决定","与人争执","独自emo","拖延","轻信他人","暴饮暴食","过度内耗","勉强自己"];
+const FT_COLOR=["午夜蓝","暗金","月白","酒红","松石绿","暖橙","星灰","樱粉"];
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function renderFortune(){
+  const r=_rng(_ds('fortune'));
+  const love=35+Math.floor(r()*64), career=35+Math.floor(r()*64), wealth=35+Math.floor(r()*64);
+  const d=new Date(); document.getElementById('ftDate').textContent=`${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日`;
+  document.getElementById('ftGauges').innerHTML=[['爱情',love],['事业',career],['财运',wealth]].map(([k,v])=>`<div class="ft-gitem"><div class="gauge" style="--v:${v}"><span class="gv">${v}</span></div><span class="gl">${k}</span></div>`).join('');
+  document.getElementById('ftYi').textContent=FT_YI[Math.floor(r()*FT_YI.length)];
+  document.getElementById('ftJi').textContent=FT_JI[Math.floor(r()*FT_JI.length)];
+  document.getElementById('ftColor').textContent=FT_COLOR[Math.floor(r()*FT_COLOR.length)];
+  document.getElementById('ftNum').textContent=1+Math.floor(r()*9);
+  const card=DECK[Math.floor(r()*DECK.length)];
+  document.getElementById('ftCard').innerHTML=`<img src="cards/${card.idx}.webp" alt="" onerror="this.style.display='none'"><div><div class="ftc-n">今日牌 · ${card.n}</div><div class="ftc-d">${card.u}</div></div>`;
+  window.__ft={love,career,wealth,card};
+  renderSignin();
+}
+function renderSignin(){
+  let ci={}; try{ ci=JSON.parse(localStorage.getItem('stella_checkin')||'{}'); }catch(e){}
+  const signed=ci.last===todayStr();
+  document.getElementById('ftSignin').innerHTML=`<div class="ft-streak">已连续签到 <b>${ci.streak||0}</b> 天</div><button class="ft-signbtn" id="ftSignBtn" ${signed?'disabled':''}>${signed?'今日已签到 ✓':'签到 · 领 10 星币'}</button>`;
+  if(!signed) document.getElementById('ftSignBtn')?.addEventListener('click',doSignin);
+}
+function doSignin(){
+  let ci={}; try{ ci=JSON.parse(localStorage.getItem('stella_checkin')||'{}'); }catch(e){}
+  const today=todayStr(); if(ci.last===today)return;
+  const y=new Date(Date.now()-86400000), yStr=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();
+  ci.streak=(ci.last===yStr)?((ci.streak||0)+1):1; ci.last=today;
+  localStorage.setItem('stella_checkin',JSON.stringify(ci));
+  coins+=10; localStorage.setItem('stella_coins',coins); document.getElementById('coinNum').textContent=coins;
+  toast('签到成功 · +10 星币 ✦'); renderSignin();
+}
+function openFortune(){ renderFortune(); document.getElementById('fortuneScreen').classList.add('open'); }
+document.getElementById('fortuneCta')?.addEventListener('click',openFortune);
+document.getElementById('ftClose')?.addEventListener('click',()=>document.getElementById('fortuneScreen').classList.remove('open'));
+document.getElementById('ftShare')?.addEventListener('click',async ()=>{ const f=window.__ft||{}; const url=await makePoster({headline:'我的今日运势',cardIdx:f.card?f.card.idx:null,big:'今日运势',lines:[`爱情 ${f.love} · 事业 ${f.career} · 财运 ${f.wealth}`,`宜 ${document.getElementById('ftYi').textContent} · 忌 ${document.getElementById('ftJi').textContent}`,`今日牌 · ${f.card?f.card.n:''}`],footer:'今日运势 · 星语塔罗'}); showPoster(url); });
+
 /* ---------- 19. 玩法说明：首次抽牌前的仪式说明 ---------- */
 let pendingHow=null;
 function maybeShowHow(then){
@@ -1533,7 +1628,7 @@ document.getElementById('howStart')?.addEventListener('click',()=>{
 
 /* ---------- 20. ESC 关闭覆盖层 ---------- */
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape')return;
-  ['memberScreen','loginScreen','birthScreen'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
+  ['memberScreen','loginScreen','birthScreen','fortuneScreen'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
 });
 </script>
 </body>
