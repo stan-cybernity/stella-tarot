@@ -543,6 +543,31 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 .chat-box button{width:44px;height:44px;flex-shrink:0;border-radius:50%;border:none;background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408;font-size:18px;cursor:pointer}
 .chat-box button:hover{box-shadow:0 6px 20px rgba(232,200,122,.4)}
 
+/* ===== 排盘卡（确定性盘面，先于AI解读出现） ===== */
+.chart-card{max-width:700px;margin:26px auto 0;padding:18px 20px;background:linear-gradient(135deg,rgba(231,201,138,.08),rgba(10,14,28,.5));border:1px solid var(--gold-dim);border-radius:16px;text-align:left;animation:fade .5s}
+.ch-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.ch-title{color:var(--gold);font-size:15px;letter-spacing:1px}
+.ch-seed{color:var(--text-dim);font-size:11px;letter-spacing:.5px}
+.ch-els{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.ch-el{flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:1px solid var(--line);border-radius:10px;color:var(--text-dim);opacity:.45}
+.ch-el.on{opacity:1}
+.ch-el.dom{border-color:var(--gold);background:rgba(231,201,138,.1)}
+.ch-el i{font-style:normal;color:var(--gold-soft);font-size:14px}
+.ch-el span{font-size:11px}
+.ch-el b{color:var(--gold);font-size:15px;font-family:"Cinzel",serif}
+.ch-energy{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ch-k{color:var(--text-dim);font-size:12px;flex-shrink:0}
+.ch-track{flex:1;height:6px;border-radius:3px;background:linear-gradient(90deg,#8a4a5a,#39405e 50%,#4a8a6a);position:relative}
+.ch-track i{position:absolute;top:-4px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));transform:translateX(-50%);box-shadow:0 0 10px rgba(231,201,138,.7)}
+.ch-energy b{color:var(--gold);font-size:13px;flex-shrink:0;white-space:nowrap}
+.ch-badges{display:flex;gap:8px;flex-wrap:wrap}
+.ch-badges span{padding:5px 11px;border:1px solid var(--line);border-radius:14px;color:var(--gold-soft);font-size:11.5px;background:rgba(8,10,20,.4)}
+/* 解读五段小节标题 + 判定高亮 + 韦特引文 */
+.rsec{color:var(--gold)!important;font-size:14px!important;letter-spacing:2px;border-left:3px solid var(--gold-dim);padding-left:10px;margin-top:20px;font-weight:600}
+.rverdict{color:var(--gold);font-size:16.5px}
+.pos-quote{margin-top:6px;color:var(--text-dim);font-size:10.5px;line-height:1.5;text-align:center;font-style:italic;opacity:.85;max-width:128px;margin-left:auto;margin-right:auto}
+.pos-quote i{display:block;font-size:9.5px;color:var(--gold-dim);margin-top:2px;font-style:normal}
+
 /* ===== 命运分享海报 ===== */
 #posterModal{z-index:250}
 .result-acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
@@ -625,6 +650,7 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
     <div class="q-echo" id="qEcho"></div>
     <div id="verdictBox"></div>
     <div class="cards" id="cards"></div>
+    <div id="chartBox"></div>
     <div id="readingBox"></div>
     <div id="chatWrap"></div>
     <div class="result-acts">
@@ -847,33 +873,85 @@ const MAJ = [
 ];
 const SUITS = [
  ["权杖","Wands","🔥",["灵感、新机会、创造的火花","动力不足、计划受阻"],
-  [["规划、远见、抉择",0],["扩展、远见、等待回报",1],["庆祝、稳定、归属",1],["竞争、分歧、磨合",-1],
-   ["胜利、认可、凯旋",1],["坚守、防御、勇气",0],["快速进展、消息、行动",1],["坚持、警惕、韧性",0],["重担、责任、压力",-1]],
-  [["热情、探索、新点子",1],["冒险、热情、行动、魅力",1],["自信、独立、热情",1],["领导力、远见、魄力",1]]],
+  [["规划、远见、抉择",0,"计划搁浅、害怕未知、困守舒适区"],["扩展、远见、等待回报",1,"进展延迟、目光短浅、徒劳等待"],["庆祝、稳定、归属",1,"根基不稳、家宅失和、喜事延期"],["竞争、分歧、磨合",-1,"回避竞争、纷争内化、不敢发声"],
+   ["胜利、认可、凯旋",1,"失势、不被认可、自负跌落"],["坚守、防御、勇气",0,"寡不敌众、疲于招架、放弃立场"],["快速进展、消息、行动",1,"节奏失控、延误、冲动行事"],["坚持、警惕、韧性",0,"心力交瘁、偏执防备、不愿求助"],["重担、责任、压力",-1,"不堪重负、学会放手、卸下重担"]],
+  [["热情、探索、新点子",1,"三分钟热度、消息延迟、方向不定"],["冒险、热情、行动、魅力",1,"鲁莽冲动、虎头蛇尾、急于求成"],["自信、独立、热情",1,"善妒苛刻、自我怀疑、锋芒伤人"],["领导力、远见、魄力",1,"专横急躁、滥用威信、刚愎自用"]]],
  ["圣杯","Cups","💧",["新感情、爱、情感充盈","情感封闭、空虚、压抑"],
-  [["结合、爱情、互相吸引",1],["友谊、庆祝、团聚",1],["冷漠、错失、倦怠",-1],["失落、遗憾、专注于损失",-1],
-   ["怀旧、纯真、回忆",1],["幻想、选择、白日梦",-1],["离开、追寻更深的意义",0],["满足、愿望成真、丰盈",1],["圆满、家庭幸福、和谐",1]],
-  [["浪漫讯息、灵感、感性",1],["浪漫、追求、理想主义",1],["共情、温柔、直觉",1],["情感成熟、包容、平和",1]]],
+  [["结合、爱情、互相吸引",1,"关系失衡、误解渐生、貌合神离"],["友谊、庆祝、团聚",1,"过度放纵、是非八卦、圈子失和"],["冷漠、错失、倦怠",-1,"走出麻木、重燃兴趣、抓住时机"],["失落、遗憾、专注于损失",-1,"接纳释怀、向前看、走出阴霾"],
+   ["怀旧、纯真、回忆",1,"困在过去、拒绝长大、旧事重提"],["幻想、选择、白日梦",-1,"看清现实、幻象破灭、做出决断"],["离开、追寻更深的意义",0,"不敢离开、原地徘徊、害怕改变"],["满足、愿望成真、丰盈",1,"贪心不足、虚假满足、愿望落空"],["圆满、家庭幸福、和谐",1,"表面和睦、价值分歧、家庭失谐"]],
+  [["浪漫讯息、灵感、感性",1,"情绪泛滥、多愁善感、消息失真"],["浪漫、追求、理想主义",1,"虚情假意、逃避现实、承诺难兑"],["共情、温柔、直觉",1,"情感透支、敏感内耗、界限模糊"],["情感成熟、包容、平和",1,"情绪压抑、被动逃避、冷漠疏离"]]],
  ["宝剑","Swords","⚔️",["突破、清晰、真相、新想法","混乱、误解、思维受阻"],
-  [["两难、僵局、权衡",0],["心碎、悲伤、伤痛",-1],["休息、恢复、沉淀",0],["冲突、争胜、代价",-1],
-   ["过渡、离开、走向平静",1],["策略、隐瞒、独行",-1],["受限、自我设限、无助",-1],["焦虑、恐惧、忧虑",-1],["结束、谷底、痛苦的终结",-1]],
-  [["好奇、机敏、警觉",0],["果断、雄辩、行动迅速",1],["独立、理智、坦诚",0],["理性、权威、思辨",1]]],
+  [["两难、僵局、权衡",0,"僵局松动、被迫抉择、迷雾渐明"],["心碎、悲伤、伤痛",-1,"伤口愈合、释怀宽恕、走出悲伤"],["休息、恢复、沉淀",0,"倦怠复发、被迫停摆、休整结束"],["冲突、争胜、代价",-1,"和解让步、旧怨翻篇、惨胜醒悟"],
+   ["过渡、离开、走向平静",1,"难以放下、行程受阻、旧事纠缠"],["策略、隐瞒、独行",-1,"真相败露、坦白从宽、自欺欺人"],["受限、自我设限、无助",-1,"挣脱束缚、视角打开、自我松绑"],["焦虑、恐惧、忧虑",-1,"焦虑缓解、长夜将尽、寻求帮助"],["结束、谷底、痛苦的终结",-1,"触底回升、劫后重生、抗拒终局"]],
+  [["好奇、机敏、警觉",0,"多疑敏感、口舌是非、轻率发言"],["果断、雄辩、行动迅速",1,"鲁莽冒进、咄咄逼人、欲速不达"],["独立、理智、坦诚",0,"言辞尖刻、冷漠疏离、过度设防"],["理性、权威、思辨",1,"冷酷无情、滥用话语权、偏执己见"]]],
  ["星币","Pentacles","🪙",["新机会、财富、踏实的开端","错失机会、财务不稳"],
-  [["平衡、灵活、取舍",0],["协作、技艺、初步成果",1],["稳固、节俭、安全感",0],["困顿、匮乏、考验",-1],
-   ["慷慨、给予与接受、互助",1],["耐心、投资、长期回报",0],["勤勉、专注、精进技艺",1],["富足、独立、自我犒赏",1],["财富、家族、长久稳定",1]],
-  [["学习、机会、目标",1],["勤恳、可靠、稳扎稳打",1],["务实、滋养、丰盛",1],["富足、稳健、事业有成",1]]],
+  [["平衡、灵活、取舍",0,"顾此失彼、入不敷出、疲于应付"],["协作、技艺、初步成果",1,"配合失灵、敷衍了事、孤军奋战"],["稳固、节俭、安全感",0,"吝啬抓取、害怕失去、过度控制"],["困顿、匮乏、考验",-1,"困境现转机、获得援手、寒冬将尽"],
+   ["慷慨、给予与接受、互助",1,"施恩图报、关系失衡、债务纠葛"],["耐心、投资、长期回报",0,"急于求成、投入无果、半途而废"],["勤勉、专注、精进技艺",1,"敷衍应付、重复消耗、技艺生疏"],["富足、独立、自我犒赏",1,"过度消费、依赖他人、成果未稳"],["财富、家族、长久稳定",1,"家业纷争、财务隐患、传承断档"]],
+  [["学习、机会、目标",1,"拖延散漫、机会溜走、心不在焉"],["勤恳、可靠、稳扎稳打",1,"停滞僵化、无聊倦怠、过分保守"],["务实、滋养、丰盛",1,"操劳过度、本末倒置、忽视自己"],["富足、稳健、事业有成",1,"固执守成、物质至上、控制欲强"]]],
 ];
 const RANKS = ["一","二","三","四","五","六","七","八","九","十","侍从","骑士","王后","国王"];
 const RANKS_EN = ["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"];
 function reverseOf(u){return "在此方面受阻或失衡："+u;}
+/* 韦特《塔罗图像之钥》(1911·公版) 22张大阿卡纳意译引文——由前端直接渲染，永不经过AI，保证引用精确 */
+const WAITE_Q=[
+ "追寻经验的灵魂，正立于崭新旅程的崖边","上承天意，下化万物——意志使一切成为可能",
+ "她坐于帷幕之前，守护不可言说的奥秘","丰饶的尘世乐园，万物因她而生长",
+ "稳固王座上的权柄，秩序由此建立","通往奥义的桥梁，传统与信念的守护者",
+ "人立于抉择之间，爱是神圣的结合","凯旋者驾驭黑白二狮，意志统御分歧之力",
+ "温柔之手合上狮口——精神高于物质的力量","他手中的灯是真理之光，照亮求索者的路",
+ "巨轮不息，起落皆是命运的流转","持剑与天平者，因果自有衡量",
+ "他的牺牲出于自愿，倒悬之中藏着启悟","终结亦是变容——旧物逝去，新生方至",
+ "天使在两盏杯间，调和生命之水","锁链松垮地挂着——束缚多半出于自愿",
+ "雷霆击碎骄傲之塔，虚妄的建构归于尘土","她将生命之水倾入池中，是永恒的希望与馈赠",
+ "幻象之路在双塔之间延伸，潜意识的潮水涌动","孩童骑白马而来，是尘世最纯粹的喜悦",
+ "号角响起，沉睡者应召而起，获得新生","舞者居于花环中央，灵魂与万象合一"
+];
+const SUIT_EL={"权杖":"火","圣杯":"水","宝剑":"风","星币":"土"};
 const DECK=[];
-MAJ.forEach(c=>DECK.push({n:c[0],e:c[1],s:c[2],u:c[3],r:c[4],p:c[5],major:true}));
+MAJ.forEach((c,i)=>DECK.push({n:c[0],e:c[1],s:c[2],u:c[3],r:c[4],p:c[5],major:true,num:i,el:"灵",q:WAITE_Q[i]}));
 SUITS.forEach(([cn,en,sym,ace,mid,court])=>{
-  DECK.push({n:cn+"一",e:"Ace of "+en,s:sym,u:ace[0],r:ace[1],p:1});
-  mid.forEach((m,i)=>DECK.push({n:cn+RANKS[i+1],e:RANKS_EN[i+1]+" of "+en,s:sym,u:m[0],r:reverseOf(m[0]),p:m[1]}));
-  court.forEach((m,i)=>DECK.push({n:cn+RANKS[i+10],e:RANKS_EN[i+10]+" of "+en,s:sym,u:m[0],r:reverseOf(m[0]),p:m[1]}));
+  const el=SUIT_EL[cn];
+  DECK.push({n:cn+"一",e:"Ace of "+en,s:sym,u:ace[0],r:ace[1],p:1,num:1,el});
+  mid.forEach((m,i)=>DECK.push({n:cn+RANKS[i+1],e:RANKS_EN[i+1]+" of "+en,s:sym,u:m[0],r:m[2]||reverseOf(m[0]),p:m[1],num:i+2,el}));
+  court.forEach((m,i)=>DECK.push({n:cn+RANKS[i+10],e:RANKS_EN[i+10]+" of "+en,s:sym,u:m[0],r:m[2]||reverseOf(m[0]),p:m[1],num:i+11,el}));
 });
 DECK.forEach((c,i)=>c.idx=i); // 牌序索引，对应 cards/<idx>.png（即梦生成的真实牌图）
+
+/* ---------- 1b. 确定性排盘引擎（系统排定，AI只解释不排盘） ---------- */
+function fnv1a(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function drawCards(n,seed){ // 带seed的Fisher-Yates洗牌：同seed必同牌，"你的问题参与了洗牌"
+  const r=_rng(seed);const a=[...DECK];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a.slice(0,n).map(card=>({card,rev:r()<0.5}));
+}
+const EL_REL={"火风":"相旺","风火":"相旺","水土":"相生","土水":"相生","火水":"相克","水火":"相克","风土":"相滞","土风":"相滞"};
+function computeChart(draws,seed){
+  const els={"火":0,"水":0,"风":0,"土":0,"灵":0};
+  let majors=0,revs=0,eff=0,numsum=0;
+  draws.forEach(d=>{els[d.card.el]++;if(d.card.major)majors++;if(d.rev)revs++;eff+=d.rev?-d.card.p:d.card.p;numsum+=d.card.num;});
+  const n=draws.length, energy=Math.round(eff/n*100);
+  let nm=numsum;while(nm>21){nm=String(nm).split("").reduce((a,c)=>a+(+c),0);}
+  const domSort=Object.entries(els).filter(([k])=>k!=="灵").sort((a,b)=>b[1]-a[1]);
+  const domEl=(domSort[0]&&domSort[0][1]>0&&(!domSort[1]||domSort[0][1]>domSort[1][1]))?domSort[0][0]:(majors>=n/2?"灵":"均衡");
+  const pairs=[];
+  for(let i=0;i<n-1;i++){const a=draws[i].card,b=draws[i+1].card;
+    if(a.el==="灵"||b.el==="灵"){pairs.push(`${a.n}→${b.n}：大牌主导，不论生克`);continue;}
+    const rel=a.el===b.el?"同元素增幅":(EL_REL[a.el+b.el]||"中性");
+    pairs.push(`${a.n}(${a.el})→${b.n}(${b.el})：${rel}`);}
+  const tone=energy>=50?"偏顺":energy>=10?"略顺":energy>-10?"持平":energy>-50?"略阻":"偏阻";
+  return {els,majors,revs,n,energy,numsum,numIdx:nm,numCard:MAJ[nm][0],domEl,pairs,seed,tone};
+}
+function renderChartCard(c){
+  const elIcons={"火":"△","水":"▽","风":"◈","土":"□","灵":"✦"};
+  const elsHtml=Object.entries(c.els).map(([k,v])=>`<div class="ch-el ${v>0?'on':''} ${k===c.domEl?'dom':''}"><i>${elIcons[k]}</i><span>${k}</span><b>${v}</b></div>`).join("");
+  const pct=Math.max(3,Math.min(97,Math.round((c.energy+100)/2)));
+  return `<div class="chart-card">
+    <div class="ch-head"><span class="ch-title serif">▍盘面 · 系统排定</span><span class="ch-seed">洗牌印记 #${c.seed.toString(16).slice(0,6).toUpperCase()} · 你的问题参与了洗牌</span></div>
+    <div class="ch-els">${elsHtml}</div>
+    <div class="ch-energy"><span class="ch-k">能量</span><div class="ch-track"><i style="left:${pct}%"></i></div><b>${c.energy>0?"+":""}${c.energy} · ${c.tone}</b></div>
+    <div class="ch-badges"><span>大阿卡纳 ${c.majors}/${c.n}${c.majors*2>=c.n?" · 重大议题":""}</span><span>逆位 ${c.revs}/${c.n}</span><span>数字归于「${c.numCard}」</span></div>
+  </div>`;
+}
 
 /* ---------- 2. 解读者 ---------- */
 const READERS = [
@@ -902,11 +980,16 @@ let currentReader = null; // 未选择塔罗师（需先在"叩响一扇门"里�
 
 /* ---------- 3. 牌阵 ---------- */
 const SPREADS = {
- daily:   {name:"今日一牌",icon:"☀",n:1,pos:["今日指引"],sub:"每天一张 · 今天的指引"},
- triangle:{name:"时光三牌",icon:"△",n:3,pos:["过去 · 根源","现在 · 核心","未来 · 走向"],sub:"过去 · 现在 · 未来，3 张"},
- love:    {name:"爱情占卜",icon:"♡",n:3,pos:["你的状态","对方的状态","关系的走向"],sub:"你 · 对方 · 关系，3 张"},
- celtic:  {name:"凯尔特十字",icon:"✚",n:10,pos:["现状","眼前挑战","根基（远因）","近期过去","可能的未来","即将到来","你的心态","外部影响","希望与恐惧","最终结果"],sub:"10 张全面剖析 · 适合大抉择"},
- yesno:   {name:"是与否",icon:"☯",n:1,pos:["核心指示"],yn:true,sub:"一张牌给你「是 / 否」"},
+ daily:   {name:"今日一牌",icon:"☀",n:1,pos:["今日指引"],sub:"每天一张 · 今天的指引",
+   rules:["当日能量主轴：正位顺取其意为今日助力，逆位提示今日的内课与需避开的状态"]},
+ triangle:{name:"时光三牌",icon:"△",n:3,pos:["过去 · 根源","现在 · 核心","未来 · 走向"],sub:"过去 · 现在 · 未来，3 张",
+   rules:["已固化的因：重牌义中的成因面，逆位表示该影响仍未被消化","当下能量核心：本局权重最高，吉凶判定以此位为主轴","趋势而非定数：正位顺推其势，逆位提示需主动扭转方向"]},
+ love:    {name:"爱情占卜",icon:"♡",n:3,pos:["你的状态","对方的状态","关系的走向"],sub:"你 · 对方 · 关系，3 张",
+   rules:["问卜者自身的真实姿态：宫廷牌指人格面具，逆位提示自我认知偏差","对方的能量与态度：只述牌面所示，不替对方下道德判断","两人能量合流的方向：以前两位生克关系修正此位强度"]},
+ celtic:  {name:"凯尔特十字",icon:"✚",n:10,pos:["现状","眼前挑战","根基（远因）","近期过去","可能的未来","即将到来","你的心态","外部影响","希望与恐惧","最终结果"],sub:"10 张全面剖析 · 适合大抉择",
+   rules:["事情的当下核心","横亘其上的阻力：即使正位也作挑战解","深层远因，事情的土壤","刚刚过去、影响渐退的能量","可能抵达的高度（潜力位）","近期将至的能量","问卜者的自我认知","环境与他人施加的力","内心深处的希望与恐惧交织处","本局最终落点：权重最高，与第1、5位连看"]},
+ yesno:   {name:"是与否",icon:"☯",n:1,pos:["核心指示"],yn:true,sub:"一张牌给你「是 / 否」",
+   rules:["单牌断是非：正位偏是、逆位偏否，牌义极性修正强度"]},
 };
 let currentSpread = "triangle";
 
@@ -961,15 +1044,16 @@ document.getElementById("again").addEventListener("click",()=>{document.getEleme
 let busy=false;
 let fanCtx=null;
 let fanBusy=false;
+let lastChart=null;   // 本局排盘数据（computeChart 结果，供 buildMessages 使用）
 async function doReading(){
   if(busy)return;
   if(!currentReader){ toast&&toast("请先选一位塔罗师"); openReaderScreen(); return; }
   if(!document.getElementById("intro")?.classList.contains("gone")) enterApp();
   const q=document.getElementById("question").value.trim()||"我此刻最该关注什么？";
   const spread=SPREADS[currentSpread];
-  const shuffled=[...DECK].sort(()=>Math.random()-0.5);
-  const draws=shuffled.slice(0,spread.n).map(card=>({card,rev:Math.random()<0.5}));
-  fanCtx={q,spread,draws}; maybeShowHow(showFan); return;
+  const seed=fnv1a(q+"|"+Date.now()+"|"+Math.floor(Math.random()*1e9)); // 问题文本参与洗牌
+  const draws=drawCards(spread.n,seed);
+  fanCtx={q,spread,draws,seed}; maybeShowHow(showFan); return;
 }
 
 /* ---------- 6b. 扇形抽牌仪式：浏览牌堆 → 凭直觉点选 → 揭示 ---------- */
@@ -1002,8 +1086,8 @@ function fanReshuffle(){
   const arc=document.getElementById("fanArc");
   arc.querySelectorAll(".fcard").forEach(c=>{ c.classList.remove("chosen"); c.classList.add("deal"); }); // 全部收拢到中心
   setTimeout(()=>{
-    const sh=[...DECK].sort(()=>Math.random()-0.5);
-    fanCtx.draws=sh.slice(0,fanCtx.spread.n).map(card=>({card,rev:Math.random()<0.5}));
+    fanCtx.seed=fnv1a(fanCtx.q+"|"+Date.now()+"|"+Math.floor(Math.random()*1e9));
+    fanCtx.draws=drawCards(fanCtx.spread.n,fanCtx.seed);
     renderFan(); fanBusy=false;                                          // 重新发牌（逐张扇开）
   }, 440);
 }
@@ -1017,6 +1101,7 @@ async function revealAndRead(q,spread,draws){
   document.getElementById("spreadName").textContent=`${spread.icon} ${spread.name}`;
   document.getElementById("qEcho").textContent=`“${q}”`;
   document.getElementById("verdictBox").innerHTML="";
+  document.getElementById("chartBox").innerHTML="";
   document.getElementById("readingBox").innerHTML="";
   const cardsEl=document.getElementById("cards");
   cardsEl.className="cards"+(currentSpread==="celtic"?" celtic":"");
@@ -1036,6 +1121,7 @@ async function revealAndRead(q,spread,draws){
         </div>
       </div>
       <div class="pos-label">${spread.pos[i]||""}</div>
+      ${d.card.q?`<div class="pos-quote">"${d.card.q}"<i>— 韦特《塔罗图像之钥》</i></div>`:""}
     </div>`).join("");
   draws.forEach((d,i)=>attachTilt(document.getElementById("tilt"+i)));
   const result=document.getElementById("result");
@@ -1055,21 +1141,29 @@ async function revealAndRead(q,spread,draws){
     document.getElementById("verdictBox").innerHTML=`<div class="verdict ${v[0]} serif">${v[1]}</div>`;
   }
 
+  // 先亮盘后解读：确定性排盘卡（纯JS秒出，先于AI文字）
+  lastChart=computeChart(draws,(fanCtx&&fanCtx.seed)||fnv1a(q));
+  document.getElementById("chartBox").innerHTML=renderChartCard(lastChart);
+
   const box=document.getElementById("readingBox");
   box.innerHTML=`<div class="reading"><div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 正在为你凝神感受这几张牌 · 别急，慢慢来<span class="dots"></span></div></div>`;
   try{ Voice.speak(currentReader.open(q), currentReader.voice); }catch(e){}  // 塔罗师开口
   const panel=box.querySelector(".reading");
 
   let usedAI=false, readingText="";
-  if(aiReady || (aiCfg.use && aiCfg.key)){
+  const rdHead=`<div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 的解读</div>`;
+  const cacheKey="stella_rd_"+fnv1a(q+"|"+spread.name+"|"+draws.map(d=>d.card.idx+(d.rev?"r":"")).join(","));
+  const cached=(()=>{try{return localStorage.getItem(cacheKey);}catch(e){return null;}})();
+  if(cached){ readingText=cached; panel.innerHTML=rdHead+formatStream(cached); usedAI=true; }
+  else if(aiReady || (aiCfg.use && aiCfg.key)){
     try{
       readingText=await streamAI(q,spread,draws,(full)=>{
-        panel.innerHTML=`<div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 的解读</div>`+
-          formatStream(full)+`<span class="cursor"></span>`;
+        panel.innerHTML=rdHead+formatStream(full)+`<span class="cursor"></span>`;
         box.scrollIntoView({behavior:"smooth",block:"nearest"});
       });
       panel.querySelector(".cursor")?.remove();
       usedAI=true;
+      try{ localStorage.setItem(cacheKey,readingText); }catch(e){}   // 同盘必同断
     }catch(err){
       panel.innerHTML=`<div class="rhead"><div class="rav"><img src="assets/web/reader_${currentReader.id}.webp" alt=""></div>${currentReader.name} 的解读</div>
         <p class="warn">（AI 接口暂时不可用：${err.message}，已切换为内置解读）</p>`+localReading(q,spread,draws);
@@ -1161,18 +1255,38 @@ let aiCfg=JSON.parse(localStorage.getItem("stella_ai")||'{"use":false,"base":"ht
 const IS_NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(window.__DS_KEY__&&!aiCfg.key){ aiCfg={use:true,base:"https://api.deepseek.com",model:"deepseek-chat",key:window.__DS_KEY__}; } // 原生App内置Key
 function buildMessages(q,spread,draws){
-  const cards=draws.map((d,i)=>`${spread.pos[i]||("位置"+(i+1))}：${d.card.n}（${d.rev?'逆位':'正位'}，牌义：${d.rev?d.card.r:d.card.u}）`).join("\n");
+  const cards=draws.map((d,i)=>{
+    const rule=(spread.rules&&spread.rules[i])?` ｜位置规则：${spread.rules[i]}`:"";
+    const quote=d.card.q?` ｜韦特引文："${d.card.q}"`:"";
+    return `${i+1}. ${spread.pos[i]||("位置"+(i+1))}｜${d.card.n}（${d.rev?'逆位':'正位'}）｜元素：${d.card.el}｜数字：${d.card.num}｜牌义：${d.rev?d.card.r:d.card.u}${rule}${quote}`;
+  }).join("\n");
+  const c=lastChart;
+  const chartBlock=c?`【盘面数据 ｜ 系统已排定，禁止更改、禁止臆造任何数字】
+洗牌印记：#${c.seed.toString(16).slice(0,6).toUpperCase()}（由问题文本参与生成）
+元素分布：火${c.els["火"]} 水${c.els["水"]} 风${c.els["风"]} 土${c.els["土"]} 灵(大牌)${c.els["灵"]}｜主导：${c.domEl}
+大阿卡纳：${c.majors}/${c.n}${c.majors*2>=c.n?"（过半，重大议题）":""}｜逆位：${c.revs}/${c.n}｜能量值：${c.energy>0?"+":""}${c.energy}（${c.tone}）
+相邻牌元素生克：${c.pairs.join("；")||"单牌无生克"}
+数字归约：各牌数字之和 ${c.numsum} → 归于大阿卡纳「${c.numCard}」`:"";
   return [
-    {role:"system",content:`你是「星语塔罗」的占卜师【${currentReader.name}】，气质：${currentReader.desc}。请用温暖、贴近人心的简体中文，为眼前这位来访者解读这次塔罗牌阵。务必遵守：
-1. 开头先用一两句话温柔地回应并复述 TA 的问题，让 TA 感到被听见、被接住；若问题里透着情绪（失恋、迷茫、焦虑、自我怀疑等），先共情，再解牌。
-2. 始终紧扣 TA 真正问的那件事和那个领域来解，绝不套用与问题无关的模板（问感情就别扯事业）。
-3. 逐张解读：每张牌单独成段，段首用「【位置名 · 牌名（正位/逆位）】」点题，再说明这张牌在这个位置、对 TA 这个问题意味着什么。
-4. 之后用一段给出整体走向与最核心的那个洞察。
-5. 最后给一句具体、温柔、可立刻去做的小建议。
-6. 语气是启发与陪伴：多用「也许」「不妨」「可以试着」这样的引导式表达，避免武断的命令、吓人的断言或宿命论。
-7. 约 350-450 字，自然分段；除了段首的【】，不要使用任何 markdown 标题、井号或星号。
-8. 全程以【${currentReader.name}】的独特气质（${currentReader.desc}）说话。`},
-    {role:"user",content:`我的问题：${q}\n牌阵：${spread.name}\n抽到的牌：\n${cards}`}
+    {role:"system",content:`你是「星语塔罗」的占卜师【${currentReader.name}】（${currentReader.desc}），承韦特-史密斯（RWS）体系。规则集：rws-cn-v1（启用逆位）。系统已完成排盘，你的职责是【解读盘面】——不是编故事。
+
+铁律（违反即失败）：
+A. 解读中引用的每张牌必须真实存在于下方盘面中，正逆位、元素、数字必须与盘面数据完全一致；所有数值判断必须引用盘面数据，不得自创数字。
+B. 严格按以下五段输出，每段以「▍段名」起头（独占一行）：
+▍盘面总览 —— 2-3句。必须引用盘面数据开局（如"本局大阿卡纳2/3，风元素主导，能量值-34，主基调动荡"），再用一句话回应TA的问题与情绪（若问题含失恋/迷茫/焦虑，先共情一句）。
+▍逐牌详解 —— 每张牌一段，段首「【位置名 · 牌名（正/逆位）】」。每段固定三句式：①此牌落于X位意味着什么（必须按位置规则解）②牌面意象与核心牌义③对TA这个问题的具体指向。紧扣TA问的领域，问感情不扯事业。
+▍元素生克 —— 1-2句，依据盘面"相邻牌元素生克"数据说明牌与牌如何相互强化或削弱（单牌阵可并入总览，跳过此段）。
+▍吉凶判定 —— 必须从【顺遂可期／偏吉、乘势而为／吉凶参半、取决于你／受阻待转、缓行为上】四档中明确选一档，以"此局判定："开头，用断言句式给出2-3条依据（引用具体牌与位置）。不许含糊、不许和稀泥。
+▍指引 —— 恰好两条：一条今天就能做的具体小事，一条本周内可执行的动作（含具体时间或场景），禁止"多沟通/保持平衡/相信直觉/顺其自然"类万金油。
+C. 语气分层：共情只放在总览段；判定段必须笃定；全篇「也许/或许/可能」合计不超过3次。负面牌（塔/恶魔/宝剑十等）解读为"课题与转机"，禁止恐吓与宿命论断言。
+D. 全程保持【${currentReader.name}】的独特口吻（${currentReader.desc}）。涉及健康/法律/重大财务时附一句"此事还请以专业意见为准"。
+E. 500-650字。除「▍」与「【】」外不使用任何markdown符号。`},
+    {role:"user",content:`${chartBlock}
+
+我的问题：${q}
+牌阵：${spread.name}（${spread.n}张）
+盘面：
+${cards}`}
   ];
 }
 async function streamMessages(messages,onToken,temp){
@@ -1209,8 +1323,12 @@ async function streamMessages(messages,onToken,temp){
   if(!full)throw new Error("空响应");
   return full;
 }
-async function streamAI(q,spread,draws,onToken){ return streamMessages(buildMessages(q,spread,draws),onToken,0.85); }
-function formatStream(text){return text.split(/\n+/).filter(s=>s.trim()).map(s=>{s=s.replace(/[*#`]/g,"");s=s.replace(/^【([^】]+)】/,'<span class="rlead">【$1】</span> ');return `<p>${s}</p>`;}).join("");}
+async function streamAI(q,spread,draws,onToken){ return streamMessages(buildMessages(q,spread,draws),onToken,0.55); } // 低温：解读应像"算出来的"，同盘倾向同断
+function formatStream(text){return text.split(/\n+/).filter(s=>s.trim()).map(s=>{s=s.replace(/[*#`]/g,"").trim();
+  if(/^▍/.test(s))return `<p class="rsec serif">${s.replace(/^▍\s*/,"")}</p>`;
+  s=s.replace(/^【([^】]+)】/,'<span class="rlead">【$1】</span> ');
+  s=s.replace(/^(此局判定：[^。，,]*)/,'<b class="rverdict">$1</b>');
+  return `<p>${s}</p>`;}).join("");}
 
 /* ---------- 9. 全息倾斜 + 粒子 ---------- */
 function attachTilt(wrap){
