@@ -340,11 +340,26 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 .btn-login:hover{color:var(--gold);border-color:var(--gold-dim)}
 @media(max-width:640px){ .btn-vip{padding:6px 10px;font-size:12px} }
 
-/* ===== 全屏覆盖层：会员 / 登录 / 本命牌 / 今日运势 ===== */
-#memberScreen,#loginScreen,#birthScreen,#fortuneScreen{position:fixed;inset:0;z-index:158;display:none;flex-direction:column;padding:54px 5vw 60px;overflow-y:auto;
+/* ===== 全屏覆盖层：会员 / 登录 / 本命牌 / 今日运势 / 缘分合盘 ===== */
+#memberScreen,#loginScreen,#birthScreen,#fortuneScreen,#synastryScreen{position:fixed;inset:0;z-index:158;display:none;flex-direction:column;padding:54px 5vw 60px;overflow-y:auto;
   background:rgba(5,4,11,.95) url('assets/web/corridor.webp') center/cover fixed}
-#memberScreen::before,#loginScreen::before,#birthScreen::before,#fortuneScreen::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(125% 95% at 50% -5%, rgba(16,23,44,.78), rgba(6,5,14,.96) 68%)}
-#memberScreen.open,#loginScreen.open,#birthScreen.open,#fortuneScreen.open{display:flex;animation:fade .45s}
+#memberScreen::before,#loginScreen::before,#birthScreen::before,#fortuneScreen::before,#synastryScreen::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(125% 95% at 50% -5%, rgba(16,23,44,.78), rgba(6,5,14,.96) 68%)}
+#memberScreen.open,#loginScreen.open,#birthScreen.open,#fortuneScreen.open,#synastryScreen.open{display:flex;animation:fade .45s}
+
+/* 缘分合盘 */
+.syn-label{color:var(--gold-soft);font-size:12.5px;letter-spacing:2px;margin:14px 0 8px;text-align:left}
+.syn-cards{display:flex;justify-content:center;align-items:flex-end;gap:14px;margin:6px 0 18px}
+.syn-c{display:flex;flex-direction:column;align-items:center;gap:8px}
+.syn-c img{width:88px;border-radius:10px;border:1px solid var(--gold-dim);box-shadow:0 10px 28px rgba(0,0,0,.5)}
+.syn-c span{color:var(--text-dim);font-size:11.5px;letter-spacing:.5px}
+.syn-c.rel img{width:118px;border-color:var(--gold);box-shadow:0 0 34px rgba(231,201,138,.45)}
+.syn-c.rel span{color:var(--gold);font-size:12.5px}
+.syn-score{margin:4px 0 6px;color:var(--gold-soft);font-size:14px;letter-spacing:2px}
+.syn-score b{display:block;font-size:52px;line-height:1.15;font-family:"Cinzel","Noto Serif SC",serif;
+  background:linear-gradient(180deg,#fff,var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.syn-subs{display:flex;justify-content:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.syn-subs span{padding:6px 13px;border:1px solid var(--line);border-radius:14px;color:var(--gold-soft);font-size:12px;background:rgba(8,10,20,.4)}
+.syn-subs b{color:var(--gold);font-family:"Cinzel",serif;margin-left:4px}
 
 /* 主界面双入口卡（今日运势 / 本命牌） */
 .feature-ctas{max-width:560px;margin:28px auto 0;display:flex;gap:14px}
@@ -675,6 +690,7 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
   <div class="feature-ctas">
     <div class="fcta" id="fortuneCta"><b class="serif">☀ 今日运势</b><span>爱情 · 事业 · 财运<br>每日一签 · 连续签到</span></div>
     <div class="fcta" id="birthCta"><b class="serif">✦ 你的本命牌</b><span>生日揭晓本命牌<br>测你的塔罗人格</span></div>
+    <div class="fcta" id="synCta"><b class="serif">♡ 缘分合盘</b><span>两个人的生日<br>一张你们的关系牌</span></div>
   </div>
 
   <div id="result">
@@ -834,6 +850,30 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
     </div>
     <button class="ms-draw cinzel" id="bsGo">揭 晓 本 命 牌</button>
     <div id="bsResult"></div>
+  </div>
+</div>
+
+<!-- ===== 缘分合盘 ===== -->
+<div id="synastryScreen">
+  <button class="ov-close" id="synClose">✕</button>
+  <div class="bs-wrap">
+    <div class="mb-kicker cinzel">SOUL SYNASTRY</div>
+    <h2 class="mb-title serif">缘分合盘</h2>
+    <p class="bs-sub">两个人的生日，各有一张本命牌；两张牌相加，得出你们的「关系牌」——它写着这段缘分的底色与课题。</p>
+    <div class="syn-label">你的生日</div>
+    <div class="bs-date">
+      <input id="syY1" type="number" inputmode="numeric" placeholder="年" min="1920" max="2025">
+      <input id="syM1" type="number" inputmode="numeric" placeholder="月" min="1" max="12">
+      <input id="syD1" type="number" inputmode="numeric" placeholder="日" min="1" max="31">
+    </div>
+    <div class="syn-label">TA 的生日</div>
+    <div class="bs-date">
+      <input id="syY2" type="number" inputmode="numeric" placeholder="年" min="1920" max="2025">
+      <input id="syM2" type="number" inputmode="numeric" placeholder="月" min="1" max="12">
+      <input id="syD2" type="number" inputmode="numeric" placeholder="日" min="1" max="31">
+    </div>
+    <button class="ms-draw cinzel" id="synGo">合 一 盘</button>
+    <div id="synResult"></div>
   </div>
 </div>
 
@@ -1578,7 +1618,7 @@ document.getElementById('heroVid')?.addEventListener('loadeddata',function(){ th
 function updateHero(){
   const hv=document.getElementById('heroVid'); if(!hv)return;
   const intro=document.getElementById('intro'); const introGone=!intro||intro.classList.contains('gone');
-  const overlay=['drawFan','modeScreen','readerScreen','memberScreen','loginScreen','birthScreen','fortuneScreen','howBg'].some(id=>{const e=document.getElementById(id);return e&&(e.classList.contains('open')||e.classList.contains('show'));});
+  const overlay=['drawFan','modeScreen','readerScreen','memberScreen','loginScreen','birthScreen','fortuneScreen','synastryScreen','howBg'].some(id=>{const e=document.getElementById(id);return e&&(e.classList.contains('open')||e.classList.contains('show'));});
   const shouldPlay=introGone && !overlay && !document.hidden;
   if(shouldPlay){ if(hv.paused) hv.play().catch(()=>{}); }
   else if(!hv.paused){ try{hv.pause();}catch(e){} }
@@ -1698,7 +1738,7 @@ document.getElementById('bsGo')?.addEventListener('click',async ()=>{
   if(!y||!m||!d||y<1920||y>2025||m<1||m>12||d<1||d>31){ toast('请输入完整、正确的生日'); return; }
   bsBusy=true;
   const n=birthCardIndex(y,m,d), c=MAJ[n];   // [名,en,emoji,正,逆,极性]
-  try{ localStorage.setItem('stella_birth',String(n)); }catch(e){}   // 持久化：今日运势与本命牌人格绑定
+  try{ localStorage.setItem('stella_birth',String(n)); localStorage.setItem('stella_bdate',JSON.stringify({y,m,d})); }catch(e){}   // 持久化：运势绑定 + 合盘预填
   const box=document.getElementById('bsResult');
   box.innerHTML=`<div class="bs-card"><img src="cards/${n}.webp" alt="${c[0]}" onerror="this.style.display='none'"><div class="bs-name">本命牌 · ${c[0]}</div><div class="bs-kw">${c[3]}</div><div class="bs-desc" id="bsDesc"><span class="dots"></span> 正在为你解读塔罗人格…</div></div>`;
   box.scrollIntoView({behavior:'smooth',block:'center'});
@@ -1712,6 +1752,55 @@ document.getElementById('bsGo')?.addEventListener('click',async ()=>{
   }catch(e){ document.getElementById('bsDesc').textContent=`你天生带着「${c[0]}」的气质：${c[3]}。`; }
   bsBusy=false;
   const r=document.getElementById('bsResult'); if(r && !document.getElementById('bsShare')){ r.insertAdjacentHTML('beforeend',`<button id="bsShare" class="ms-skip" style="display:block;margin:20px auto 0;color:var(--gold)">✦ 生成我的本命卡 · 分享给好友</button>`); document.getElementById('bsShare').addEventListener('click',async ()=>{ const desc=(document.getElementById('bsDesc')||{}).textContent||''; const rare=(3.2+(n*7)%11).toFixed(1); const url=await makePoster({headline:'我的本命牌',cardIdx:n,big:c[0],lines:[desc.slice(0,46),`全网约 ${rare}% 的人与你同牌`],footer:'你的塔罗人格 · 星语塔罗'}); showPoster(url); }); }
+});
+
+/* ---------- 18c2. 缘分合盘（确定性排盘：本命牌×2 → 关系牌 + 缘分指数，AI只解读） ---------- */
+function reduce21(n){while(n>21){n=String(n).split("").reduce((a,c)=>a+(+c),0);}return n;}
+function openSynastry(){
+  document.getElementById('synResult').innerHTML='';
+  try{const b=JSON.parse(localStorage.getItem('stella_bdate')||'null');if(b){document.getElementById('syY1').value=b.y;document.getElementById('syM1').value=b.m;document.getElementById('syD1').value=b.d;}}catch(e){}
+  document.getElementById('synastryScreen').classList.add('open');
+}
+document.getElementById('synCta')?.addEventListener('click',openSynastry);
+document.getElementById('synClose')?.addEventListener('click',()=>document.getElementById('synastryScreen').classList.remove('open'));
+let synBusy=false;
+document.getElementById('synGo')?.addEventListener('click',async ()=>{
+  if(synBusy)return;
+  const v=id=>+document.getElementById(id).value;
+  const y1=v('syY1'),m1=v('syM1'),d1=v('syD1'),y2=v('syY2'),m2=v('syM2'),d2=v('syD2');
+  const ok=(y,m,d)=>y>=1920&&y<=2025&&m>=1&&m<=12&&d>=1&&d<=31;
+  if(!ok(y1,m1,d1)||!ok(y2,m2,d2)){toast('请把两个人的生日都填完整');return;}
+  synBusy=true;
+  const A=birthCardIndex(y1,m1,d1),B=birthCardIndex(y2,m2,d2),REL=reduce21(A+B);
+  const h=fnv1a(A+'-'+B);                       // 同两人必同分，可复验
+  let s=62+(h%9); if(A===B)s+=16; if([6,14,17,19,21].includes(REL))s+=12; if([13,15,16].includes(REL))s-=6; if((A+B)%2===0)s+=4;
+  s=Math.max(45,Math.min(98,s));
+  const sub=o=>Math.max(42,Math.min(99,s+((h>>o)%13)-6));
+  const heart=sub(3),tacit=sub(7),lastv=sub(11);
+  const box=document.getElementById('synResult');
+  box.innerHTML=`<div class="bs-card" style="margin-top:24px">
+    <div class="syn-cards">
+      <div class="syn-c"><img src="cards/${A}.webp" onerror="this.style.display='none'"><span>你 · ${MAJ[A][0]}</span></div>
+      <div class="syn-c rel"><img src="cards/${REL}.webp" onerror="this.style.display='none'"><span>关系牌 · ${MAJ[REL][0]}</span></div>
+      <div class="syn-c"><img src="cards/${B}.webp" onerror="this.style.display='none'"><span>TA · ${MAJ[B][0]}</span></div>
+    </div>
+    <div class="syn-score">缘分指数<b>${s}</b></div>
+    <div class="syn-subs"><span>心动<b>${heart}</b></span><span>默契<b>${tacit}</b></span><span>长久<b>${lastv}</b></span></div>
+    <div class="bs-desc" id="synDesc"><span class="dots"></span> 正在为你们合盘…</div></div>`;
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+  const sys=[{role:'system',content:`你是「星语塔罗」的缘分合盘师。盘面已由系统排定（禁止更改任何数字）：一方本命牌「${MAJ[A][0]}」（${MAJ[A][3]}），另一方本命牌「${MAJ[B][0]}」（${MAJ[B][3]}），关系牌「${MAJ[REL][0]}」（${MAJ[REL][3]}），缘分指数 ${s}（心动${heart}／默契${tacit}／长久${lastv}）。请输出四段，每段以「▍段名」起头独占一行：▍你们的底色（两张本命牌的性格如何相遇，2句）→▍吸引与摩擦（最强吸引点一句＋最易起摩擦处一句）→▍关系的课题（关系牌「${MAJ[REL][0]}」给这段缘分的功课，2句）→▍相处指引（恰好两条、具体可做，禁止"多沟通／多包容"类空话）。语气温暖笃定、不宿命；负面牌作课题解；230-320字；除「▍」外不用任何markdown。`}];
+  try{
+    if(aiReady||(aiCfg.use&&aiCfg.key)){ await streamMessages(sys,(full)=>{document.getElementById('synDesc').innerHTML=formatStream(full);},0.6); }
+    else{ document.getElementById('synDesc').textContent=`你们的关系牌是「${MAJ[REL][0]}」：${MAJ[REL][3]}。这是这段缘分的底色，也是你们共同要修的课题。`; }
+  }catch(e){ document.getElementById('synDesc').textContent=`你们的关系牌是「${MAJ[REL][0]}」：${MAJ[REL][3]}。`; }
+  if(!document.getElementById('synShare')){
+    box.insertAdjacentHTML('beforeend',`<button id="synShare" class="ms-skip" style="display:block;margin:18px auto 0;color:var(--gold)">✦ 生成我们的合盘卡 · 发给 TA</button>`);
+    document.getElementById('synShare').addEventListener('click',async ()=>{
+      const url=await makePoster({headline:'我们的关系牌',cardIdx:REL,big:`缘分指数 ${s}`,lines:[`你 · ${MAJ[A][0]}　×　TA · ${MAJ[B][0]}`,`关系牌「${MAJ[REL][0]}」 ${MAJ[REL][3].split('、').slice(0,3).join('、')}`,`心动 ${heart} · 默契 ${tacit} · 长久 ${lastv}`],footer:'缘分合盘 · 星语塔罗'});
+      showPoster(url);
+    });
+  }
+  synBusy=false;
 });
 
 /* ---------- 18d. 命运分享海报（Canvas 出图，可存图分享） ---------- */
@@ -1801,7 +1890,7 @@ document.getElementById('howStart')?.addEventListener('click',()=>{
 
 /* ---------- 20. ESC 关闭覆盖层 ---------- */
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape')return;
-  ['memberScreen','loginScreen','birthScreen','fortuneScreen'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
+  ['memberScreen','loginScreen','birthScreen','fortuneScreen','synastryScreen'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
 });
 </script>
 </body>
