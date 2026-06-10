@@ -22,6 +22,11 @@
   --text:#eae8f3; --text-dim:#b3b8d2; --line:rgba(231,201,138,.20);
   --iris1:#7ad9ff; --iris2:#e89bff; --iris3:#ffe07a;
   --shadow:0 20px 60px rgba(0,0,0,.6);
+  /* design tokens（战役二·UI工业化） */
+  --gold-100:#f6e7c1; --gold-300:#e3c988; --gold-500:#c9a45c; --gold-700:#9a7634; --gold-900:#6b4e1e;
+  --r-sm:8px; --r-md:16px; --r-lg:24px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px;
+  --btn-ink:#3a2a12;
 }
 html[data-theme="light"]{
   --bg:#f1ebdf; --bg2:#fbf7ee; --panel:rgba(255,255,255,.78);
@@ -371,6 +376,7 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 .ft-card .ftc-d{color:var(--text-dim);font-size:12.5px;margin-top:4px;line-height:1.5}
 .ft-signin{display:flex;flex-direction:column;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(231,201,138,.1),transparent);border:1px solid var(--gold-dim);border-radius:14px;padding:18px}
 .ft-streak{color:var(--gold);font-size:15px}
+.ft-mile{color:var(--gold-soft);font-size:12px;letter-spacing:.5px}
 .ft-streak b{font-size:22px;font-family:"Cinzel",serif}
 .ft-signbtn{padding:12px 32px;border-radius:24px;border:none;background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:2px}
 .ft-signbtn:disabled{background:transparent;border:1px solid var(--line);color:var(--text-dim);cursor:default}
@@ -543,6 +549,23 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 .chat-box button{width:44px;height:44px;flex-shrink:0;border-radius:50%;border:none;background:radial-gradient(circle at 35% 30%,#f3d98c,var(--gold-soft));color:#1a1408;font-size:18px;cursor:pointer}
 .chat-box button:hover{box-shadow:0 6px 20px rgba(232,200,122,.4)}
 
+/* ===== 战役二：主按钮四层材质（渐变+内描边+外发光+高光sweep），金底深棕字 ===== */
+.ms-draw,.login-primary,.plan-btn.go,.ft-signbtn,.birth-cta-btn,.poster-dl,.modal .save,.rs-btn.free,.send,.chat-box button,.howto-start{
+  position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#f2dfae 0%,#d4af6a 46%,#9c7634 100%);
+  color:var(--btn-ink);border:none;
+  box-shadow:inset 0 1px 0 rgba(255,243,214,.55), inset 0 0 0 1px rgba(255,243,214,.22), 0 0 20px rgba(212,175,106,.28), 0 6px 18px rgba(0,0,0,.35);
+  text-shadow:0 1px 0 rgba(255,248,228,.3)}
+.ms-draw::after,.login-primary::after,.plan-btn.go::after,.ft-signbtn::after,.birth-cta-btn::after{
+  content:"";position:absolute;top:-30%;left:-70%;width:46%;height:160%;pointer-events:none;
+  background:linear-gradient(105deg,transparent 8%,rgba(255,252,240,.5) 50%,transparent 92%);
+  transform:skewX(-18deg);animation:btnSweep 4.2s ease-in-out infinite}
+@keyframes btnSweep{0%,72%{left:-70%}88%,100%{left:130%}}
+.ms-draw:hover,.login-primary:hover,.plan-btn.go:hover,.ft-signbtn:not(:disabled):hover{filter:brightness(1.06)}
+.ms-draw:active,.login-primary:active,.plan-btn.go:active,.ft-signbtn:not(:disabled):active{filter:brightness(.86);transform:translateY(1px)}
+.ft-signbtn:disabled{background:rgba(255,255,255,.06)!important;border:1px solid var(--line)!important;color:rgba(232,222,200,.45)!important;box-shadow:none!important;text-shadow:none}
+.ft-signbtn:disabled::after{display:none}
+
 /* ===== 排盘卡（确定性盘面，先于AI解读出现） ===== */
 .chart-card{max-width:700px;margin:26px auto 0;padding:18px 20px;background:linear-gradient(135deg,rgba(231,201,138,.08),rgba(10,14,28,.5));border:1px solid var(--gold-dim);border-radius:16px;text-align:left;animation:fade .5s}
 .ch-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:14px}
@@ -562,8 +585,17 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
 .ch-energy b{color:var(--gold);font-size:13px;flex-shrink:0;white-space:nowrap}
 .ch-badges{display:flex;gap:8px;flex-wrap:wrap}
 .ch-badges span{padding:5px 11px;border:1px solid var(--line);border-radius:14px;color:var(--gold-soft);font-size:11.5px;background:rgba(8,10,20,.4)}
-/* 解读五段小节标题 + 判定高亮 + 韦特引文 */
+/* 解读五段小节标题 + 判定高亮 + 韦特引文 + 逐牌结算卡 */
 .rsec{color:var(--gold)!important;font-size:14px!important;letter-spacing:2px;border-left:3px solid var(--gold-dim);padding-left:10px;margin-top:20px;font-weight:600}
+.rcard{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid rgba(201,164,92,.15)}
+.rcard:last-of-type{border-bottom:none}
+.rcard img{width:56px;border-radius:var(--r-sm);border:1px solid var(--gold-dim);box-shadow:0 4px 14px rgba(0,0,0,.4);flex-shrink:0}
+.rcard-bd{flex:1;min-width:0}
+.rcard-hd{color:var(--gold);font-size:15px;margin-bottom:6px;line-height:1.5}
+.rcard-bd p{font-size:14.5px!important;line-height:1.85!important;margin:0}
+.rbadge{font-style:normal;display:inline-block;margin-left:6px;padding:1px 9px;border-radius:10px;font-size:11px;vertical-align:2px;
+  background:rgba(231,201,138,.15);border:1px solid var(--gold-dim);color:var(--gold-soft)}
+.rbadge.rv{background:rgba(155,91,138,.18);border-color:#9b5b8a;color:#d9a8cc}
 .rverdict{color:var(--gold);font-size:16.5px}
 .pos-quote{margin-top:6px;color:var(--text-dim);font-size:10.5px;line-height:1.5;text-align:center;font-style:italic;opacity:.85;max-width:128px;margin-left:auto;margin-right:auto}
 .pos-quote i{display:block;font-size:9.5px;color:var(--gold-dim);margin-top:2px;font-style:normal}
@@ -710,14 +742,14 @@ footer{position:relative;z-index:3;text-align:center;color:var(--text-dim);font-
   <div class="mb-head">
     <div class="mb-kicker cinzel">UNLOCK THE BOOK OF FATE</div>
     <h2 class="mb-title serif">开启你的命运之书</h2>
-    <p class="mb-sub">免费即可占卜。开通会员，解锁电影级深度解读、全部塔罗师与无限星币——让每一次叩问都更深一层。</p>
+    <p class="mb-sub">每天一次免费叩问。开通会员，解锁不限追问、全部塔罗师与大牌阵——让每一次叩问都走得更深。</p>
     <div class="mb-toggle" id="mbToggle">
       <button data-cycle="month" class="on">按月</button>
       <button data-cycle="year">按年<span class="mb-save">省 30%</span></button>
     </div>
   </div>
   <div class="plans" id="plans"></div>
-  <p class="mb-foot"><b style="color:var(--gold-soft)">星币 vs 会员：</b>星币是每日登录免费赠送的占卜额度，单次占卜消耗少量星币、<b>不花真钱</b>；开通会员＝星币管够、解读更深、解锁更多塔罗师。免费也能完整占卜，会员只为想走得更深的人。<br>订阅可随时取消，未到期权益保留。当前为演示界面，支付与账户功能将在正式版开放（计划接入微信 / 支付宝 / Stripe）。</p>
+  <p class="mb-foot"><b style="color:var(--gold-soft)">星币 vs 会员：</b>星币是占卜额度，每日登录赠送少量、可应付日常一问；会员＝星币管够、追问不限轮数、解锁全部塔罗师与大牌阵。所有档位的解读精度完全一致。<br>订阅可随时取消，未到期权益保留。当前为演示界面，支付与账户功能将在正式版开放（计划接入微信 / 支付宝 / Stripe）。</p>
 </div>
 
 <!-- ===== 登录 ===== -->
@@ -1212,6 +1244,12 @@ async function sendChat(preset){
   if(!chatCtx||chatCtx.busy)return;
   const input=document.getElementById("chatInput");
   const text=(preset||input.value||"").trim(); if(!text)return;
+  // 追问分层：免费2轮，之后每轮消耗10星币；星币不足→开通会员（解读精度全程一致，只限轮数）
+  chatCtx.rounds=(chatCtx.rounds||0)+1;
+  if(chatCtx.rounds>2){
+    if(coins>=10){ coins-=10; localStorage.setItem('stella_coins',coins); document.getElementById('coinNum').textContent=coins; toast('已消耗 10 ✦ · 继续深聊'); }
+    else { chatCtx.rounds--; toast('星币不足 · 会员可不限轮数追问'); openMember(); return; }
+  }
   input.value=""; chatCtx.busy=true;
   const log=document.getElementById("chatLog");
   log.insertAdjacentHTML("beforeend",`<div class="cmsg me">${text.replace(/</g,"&lt;")}</div>`);
@@ -1326,7 +1364,16 @@ async function streamMessages(messages,onToken,temp){
 async function streamAI(q,spread,draws,onToken){ return streamMessages(buildMessages(q,spread,draws),onToken,0.55); } // 低温：解读应像"算出来的"，同盘倾向同断
 function formatStream(text){return text.split(/\n+/).filter(s=>s.trim()).map(s=>{s=s.replace(/[*#`]/g,"").trim();
   if(/^▍/.test(s))return `<p class="rsec serif">${s.replace(/^▍\s*/,"")}</p>`;
-  s=s.replace(/^【([^】]+)】/,'<span class="rlead">【$1】</span> ');
+  const m=s.match(/^【([^】]+)】/);
+  if(m){ // 逐牌段 → 结算模块卡（牌面缩略图 + 位置头 + 正逆badge）
+    const lead=m[1], body=s.slice(m[0].length).trim();
+    const nm=(lead.match(/([^·\s（(]+)[（(]/)||[])[1];
+    const card=nm?DECK.find(c=>c.n===nm):null;
+    const rev=/逆位/.test(lead);
+    const hd=lead.replace(/（(正位|逆位)）/,`<i class="rbadge ${rev?'rv':''}">$1</i>`);
+    if(card)return `<div class="rcard"><img src="cards/${card.idx}.webp" loading="lazy" onerror="this.remove()"><div class="rcard-bd"><div class="rcard-hd serif">${hd}</div><p>${body}</p></div></div>`;
+    return `<p><span class="rlead">【${lead}】</span> ${body}</p>`;
+  }
   s=s.replace(/^(此局判定：[^。，,]*)/,'<b class="rverdict">$1</b>');
   return `<p>${s}</p>`;}).join("");}
 
@@ -1566,7 +1613,7 @@ function openModeScreen(key){
   const msQ=document.getElementById('msQuestion'); msQ.value=mainQ; document.getElementById('msCount').textContent=mainQ.length;
   if(currentReader){ const idx=READERS.findIndex(r=>r.id===currentReader.id); if(idx>=0) msReaderIdx=idx; }
   renderMsReaders();
-  document.getElementById('msCost').innerHTML=`你有 <b>${coins}</b> 星币 · 本次消耗 20，还能抽 <b>${Math.floor(coins/20)}</b> 次 · 星币每日登录免费赠送，<b>不花真钱</b>`;
+  document.getElementById('msCost').innerHTML=`你有 <b>${coins}</b> ✦ · 本次消耗 20 · 每日登录赠星币`;
   document.getElementById('msSkip').style.display=(sp.n===1)?'inline-block':'none';
   if(!document.getElementById("intro")?.classList.contains("gone")) enterApp();
   showLoading(sp.name, ()=>document.getElementById('modeScreen').classList.add('open'));
@@ -1596,25 +1643,26 @@ document.getElementById('msFriend')?.addEventListener('click',()=>toast('「让�
 /* ---------- 17. 会员 / 订阅页 ---------- */
 const PLANS=[
   {id:'free',name:'访客',price:{month:'¥0',year:'¥0'},note:'永久免费',btn:'当前方案',cls:'cur',
-   feats:['每日登录赠送星币 · 够日常占卜','全部基础牌阵：圣三角 / 是与否 / 今日一牌','内置贤者解读','三位免费塔罗师'],
-   off:['AI 深度流式解读','会员专属塔罗师','专属牌背与星语语音']},
-  {id:'seer',name:'星探',price:{month:'¥28',year:'¥228'},note:'进阶之选',feat:true,btn:'开通星探',cls:'go',badge:'最受欢迎',
-   feats:['每日双倍星币 · 占卜管够','AI 深度流式解读（更细更准）','解锁全部牌阵（含凯尔特十字）','解锁会员塔罗师','去除一切广告'],
-   off:['专属牌背与星语语音']},
-  {id:'master',name:'大师',price:{month:'¥68',year:'¥588'},note:'尊享全部',btn:'成为大师',cls:'ghost',
-   feats:['无限占卜 · 无限星币','全部五位塔罗师','专属电影级牌背与星语语音','优先生成 · 更快出图出片','命运日志云端同步']}
+   feats:['每日登录赠星币 · 每天免费叩问','基础牌阵：时光三牌 / 是与否 / 今日一牌','AI 流式解读（与会员同等精度）','两位塔罗师 · 翻牌后追问 2 轮'],
+   off:['不限轮数追问','会员专属塔罗师','凯尔特十字大牌阵','占卜记录永久保存']},
+  {id:'seer',name:'星探',price:{month:'¥28',year:'¥228'},ynote:'立省 ¥108 · 折合 ¥19/月',note:'进阶之选',feat:true,btn:'开通星探',cls:'go',badge:'最受欢迎',
+   feats:['每日双倍星币 · 占卜管够','不限轮数追问 · TA 记得你的每一次叩问','解锁全部牌阵（含凯尔特十字）','解锁全部五位塔罗师','占卜记录永久保存'],
+   off:['每月 1 份深度报告','专属牌背与星语语音']},
+  {id:'master',name:'大师',price:{month:'¥68',year:'¥588'},ynote:'立省 ¥228 · 折合 ¥49/月',note:'尊享全部',btn:'成为大师',cls:'ghost',
+   feats:['星探全部权益','每月 1 份深度报告（流年 / 合盘任选）','大师级塔罗师 1 对 1 长对话','专属电影级牌背与星语语音','新玩法抢先体验']}
 ];
 let mbCycle='month';
 function renderPlans(){
   const box=document.getElementById('plans'); if(!box)return;
   box.innerHTML=PLANS.map(p=>{
     const price=p.price[mbCycle];
+    const noteTxt=(mbCycle==='year'&&p.ynote)?p.ynote:p.note;
     const per=p.id==='free'?'':(mbCycle==='month'?'<small> / 月</small>':'<small> / 年</small>');
     const feats=p.feats.map(f=>`<li>${f}</li>`).join('')+(p.off?p.off.map(f=>`<li class="off">${f}</li>`).join(''):'');
     return `<div class="plan ${p.feat?'feat':''}">${p.badge?`<div class="plan-badge">${p.badge}</div>`:''}
       <div class="plan-name cinzel">星语 · ${p.name}</div>
       <div class="plan-price">${price}${per}</div>
-      <div class="plan-note">${p.note}</div>
+      <div class="plan-note">${noteTxt}</div>
       <ul>${feats}</ul>
       <button class="plan-btn ${p.cls}" data-plan="${p.id}">${p.btn}</button></div>`;
   }).join('');
@@ -1650,6 +1698,7 @@ document.getElementById('bsGo')?.addEventListener('click',async ()=>{
   if(!y||!m||!d||y<1920||y>2025||m<1||m>12||d<1||d>31){ toast('请输入完整、正确的生日'); return; }
   bsBusy=true;
   const n=birthCardIndex(y,m,d), c=MAJ[n];   // [名,en,emoji,正,逆,极性]
+  try{ localStorage.setItem('stella_birth',String(n)); }catch(e){}   // 持久化：今日运势与本命牌人格绑定
   const box=document.getElementById('bsResult');
   box.innerHTML=`<div class="bs-card"><img src="cards/${n}.webp" alt="${c[0]}" onerror="this.style.display='none'"><div class="bs-name">本命牌 · ${c[0]}</div><div class="bs-kw">${c[3]}</div><div class="bs-desc" id="bsDesc"><span class="dots"></span> 正在为你解读塔罗人格…</div></div>`;
   box.scrollIntoView({behavior:'smooth',block:'center'});
@@ -1662,7 +1711,7 @@ document.getElementById('bsGo')?.addEventListener('click',async ()=>{
     }
   }catch(e){ document.getElementById('bsDesc').textContent=`你天生带着「${c[0]}」的气质：${c[3]}。`; }
   bsBusy=false;
-  const r=document.getElementById('bsResult'); if(r && !document.getElementById('bsShare')){ r.insertAdjacentHTML('beforeend',`<button id="bsShare" class="ms-skip" style="display:block;margin:20px auto 0;color:var(--gold)">✦ 生成我的本命卡 · 分享给好友</button>`); document.getElementById('bsShare').addEventListener('click',async ()=>{ const desc=(document.getElementById('bsDesc')||{}).textContent||''; const url=await makePoster({headline:'我的本命牌',cardIdx:n,big:c[0],lines:[desc.slice(0,46)],footer:'你的塔罗人格 · 星语塔罗'}); showPoster(url); }); }
+  const r=document.getElementById('bsResult'); if(r && !document.getElementById('bsShare')){ r.insertAdjacentHTML('beforeend',`<button id="bsShare" class="ms-skip" style="display:block;margin:20px auto 0;color:var(--gold)">✦ 生成我的本命卡 · 分享给好友</button>`); document.getElementById('bsShare').addEventListener('click',async ()=>{ const desc=(document.getElementById('bsDesc')||{}).textContent||''; const rare=(3.2+(n*7)%11).toFixed(1); const url=await makePoster({headline:'我的本命牌',cardIdx:n,big:c[0],lines:[desc.slice(0,46),`全网约 ${rare}% 的人与你同牌`],footer:'你的塔罗人格 · 星语塔罗'}); showPoster(url); }); }
 });
 
 /* ---------- 18d. 命运分享海报（Canvas 出图，可存图分享） ---------- */
@@ -1684,7 +1733,7 @@ async function makePoster({headline,cardIdx,big,lines,footer}){
   x.fillStyle='#e7e6f2';x.font='34px "Noto Sans SC",sans-serif';
   (lines||[]).forEach(ln=>{ if(ln) y=_wrap(x,ln,W/2,y,W-220,54)+8; });
   x.fillStyle='rgba(205,174,114,.92)';x.font='30px "Noto Serif SC",serif';x.fillText(footer||'叩问命运 · 照见自己',W/2,H-152);
-  x.fillStyle='rgba(154,161,189,.72)';x.font='24px "Noto Sans SC",sans-serif';x.fillText('星语塔罗 · 来测属于你的那张牌',W/2,H-102);
+  x.fillStyle='rgba(154,161,189,.72)';x.font='24px "Noto Sans SC",sans-serif';x.fillText('来测属于你的那张牌 ✦ stella-tarot.onrender.com',W/2,H-102);
   return cv.toDataURL('image/jpeg',.92);
 }
 function showPoster(url){ document.getElementById('posterImg').src=url; const dl=document.getElementById('posterDl'); if(dl){dl.href=url;} document.getElementById('posterModal').classList.add('open'); }
@@ -1701,11 +1750,16 @@ function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth(
 function renderFortune(){
   const r=_rng(_ds('fortune'));
   const love=35+Math.floor(r()*64), career=35+Math.floor(r()*64), wealth=35+Math.floor(r()*64);
-  const d=new Date(); document.getElementById('ftDate').textContent=`${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日`;
+  const d=new Date();
+  const bn=parseInt(localStorage.getItem('stella_birth')||'-1');
+  const bind=(bn>=0&&MAJ[bn])?` · ${MAJ[bn][0]}人今日`:'';
+  document.getElementById('ftDate').textContent=`${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日${bind}`;
   document.getElementById('ftGauges').innerHTML=[['爱情',love],['事业',career],['财运',wealth]].map(([k,v])=>`<div class="ft-gitem"><div class="gauge" style="--v:${v}"><span class="gv">${v}</span></div><span class="gl">${k}</span></div>`).join('');
   document.getElementById('ftYi').textContent=FT_YI[Math.floor(r()*FT_YI.length)];
   document.getElementById('ftJi').textContent=FT_JI[Math.floor(r()*FT_JI.length)];
-  document.getElementById('ftColor').textContent=FT_COLOR[Math.floor(r()*FT_COLOR.length)];
+  const FT_SWATCH={"午夜蓝":"#1b2a52","暗金":"#c9a45c","月白":"#e8ecf4","酒红":"#7a2738","松石绿":"#2e8b8b","暖橙":"#d98e4a","星灰":"#9aa1b5","樱粉":"#e8a8b8"};
+  const luck=FT_COLOR[Math.floor(r()*FT_COLOR.length)];
+  document.getElementById('ftColor').innerHTML=`<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${FT_SWATCH[luck]||'#c9a45c'};border:1px solid rgba(255,255,255,.25);vertical-align:-1px;margin-right:6px"></span>${luck}`;
   document.getElementById('ftNum').textContent=1+Math.floor(r()*9);
   const card=DECK[Math.floor(r()*DECK.length)];
   document.getElementById('ftCard').innerHTML=`<img src="cards/${card.idx}.webp" alt="" onerror="this.style.display='none'"><div><div class="ftc-n">今日牌 · ${card.n}</div><div class="ftc-d">${card.u}</div></div>`;
@@ -1714,8 +1768,9 @@ function renderFortune(){
 }
 function renderSignin(){
   let ci={}; try{ ci=JSON.parse(localStorage.getItem('stella_checkin')||'{}'); }catch(e){}
-  const signed=ci.last===todayStr();
-  document.getElementById('ftSignin').innerHTML=`<div class="ft-streak">已连续签到 <b>${ci.streak||0}</b> 天</div><button class="ft-signbtn" id="ftSignBtn" ${signed?'disabled':''}>${signed?'今日已签到 ✓':'签到 · 领 10 星币'}</button>`;
+  const signed=ci.last===todayStr(), st=ci.streak||0;
+  const mile=st>=30?'✓ 已解锁 30 天限定牌背':st>=7?`✓ 会员塔罗师体验已解锁 · 距限定牌背还差 ${30-st} 天`:`再签 ${7-st} 天 · 解锁会员塔罗师体验 1 天`;
+  document.getElementById('ftSignin').innerHTML=`<div class="ft-streak">已连续签到 <b>${st}</b> 天</div><div class="ft-mile">${mile}</div><button class="ft-signbtn" id="ftSignBtn" ${signed?'disabled':''}>${signed?'今日已签到 · 明日可领 +10 ✦':'签到 · 领 10 星币'}</button>`;
   if(!signed) document.getElementById('ftSignBtn')?.addEventListener('click',doSignin);
 }
 function doSignin(){
